@@ -6,3 +6,5 @@ spec:
   containers:
   - name: private-pod
     image: harbor.taskoo.net/koo/1.0.0
+  imagePullSecrets:
+  - name: regcred
