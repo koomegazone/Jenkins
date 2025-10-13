@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deploy-echo
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: deploy-websrv
+  template:
+    metadata:
+      labels:
+        app: deploy-websrv
+    spec:
+      terminationGracePeriodSeconds: 0
+      containers:
+      - name: aews-websrv
+        image: k8s.gcr.io/echoserver:1.5
+        ports:
+        - containerPort: 8080
