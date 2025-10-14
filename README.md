@@ -1,4 +1,4 @@
-#https://zigispace.net/1174
+```https://zigispace.net/1174```
 
 ALB를 사용하는 경우 인스턴스모드와 ip모드가 있는데 
 인스턴스 모드는 노드의 nodePort로 NAT되어 통신되고
