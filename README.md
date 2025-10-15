@@ -18,9 +18,9 @@ AWS EKS 환경에서 **Application Load Balancer(ALB)** 를 사용하지만
 - **트래픽 경로:**  
   외부 클라이언트 → ALB → EC2(Node) → NodePort → Pod
 - **문제 유형:**  
-  - <span style="color:red">타깃그룹 자동 연계 불가</span>  
-  - <span style="color:red">보안그룹 자동 설정 불가</span>  
-  - <span style="color:red">노드 교체/스케일링 시 Target Group 갱신 누락</span>
+  - <span style="color:red"> 🚨 타깃그룹 자동 연계 불가</span>  
+  - <span style="color:red"> 🚨 보안그룹 자동 설정 불가</span>  
+  - <span style="color:red"> 🚨 노드 교체/스케일링 시 Target Group 갱신 누락</span>
 ---
 #### ✅ (1) SG 자동 생성 및 최소 권한 규칙 적용
 - LBC는 Ingress 또는 Service 리소스를 생성할 때,  
