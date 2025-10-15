@@ -1,4 +1,4 @@
-# EKS 환경에서 ALB + NodePort 운영 (LBC 미사용 시 고려사항)
+# 👏 EKS 환경에서 ALB + NodePort 운영 (LBC 미사용 시 고려사항)
 
 ## 🧩 개요
 
