@@ -8,6 +8,8 @@ AWS EKS 환경에서 **Application Load Balancer(ALB)** 를 사용하지만
 
 ---
 
+
+
 ## ⚙️ 구성 개요
 
 - **Ingress Controller:** ALB (수동 구성)
