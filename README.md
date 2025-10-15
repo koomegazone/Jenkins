@@ -1,4 +1,4 @@
-# EKS 환경에서 LBC 없이 NodePort로 서비스 운영 시 고려사항
+## ⚠️ LBC 없이 NodePort 운영 시 주요 단점
 
 ## 🧩 개요
 
@@ -35,6 +35,53 @@ LBC를 사용하면 파드 IP 또는 NodePort가 자동으로 Target Group에 �
 ### 1. EC2 인스턴스를 Target Group에 직접 추가해야 함
 EC2 인스턴스를 Target Group에 직접 추가해야 함
 
+
+---
+
 ### 2. Auto Scaling 시 새 노드가 자동으로 Target Group에 등록되지 않음
 Auto Scaling 시 새 노드가 자동으로 Target Group에 등록되지 않음
 
+
+---
+
+### 3. ⚙️ 운영/모니터링 기능 제한
+- **헬스체크(Health Check) 수동 설정**
+  - Target Group의 헬스체크 경로를 직접 지정해야 함  
+  - 파드 재시작/스케줄링 시 상태 정보가 실시간 반영되지 않음
+- **CloudWatch / ELB Metrics 미지원**
+  - LBC가 없으므로, 트래픽/Latency/4xx/5xx 등의 AWS 기본 모니터링 지표를 사용할 수 없음
+- **AWS ALB 로그/Access Log 연계 불가**
+
+---
+
+### 4. 🌐 트래픽 분산 품질 저하
+- **NodePort는 Round Robin + kube-proxy 의존**
+  - L7 수준의 트래픽 라우팅(ALB의 Path/Host 기반 라우팅 등)을 사용할 수 없음
+- **Sticky Session, SSL Termination, WAF 연계 불가**
+  - 세션 유지나 HTTPS 종료를 Node 수준에서 직접 처리해야 함
+  - 실서비스에서는 L7 기능 부족으로 인해 운영이 어렵거나 복잡해짐
+
+---
+
+### 5. 🧰 유지보수 및 DevOps 워크플로우 영향
+- CI/CD에서 새 노드나 파드 배포 시 수동 구성 단계 증가  
+- IaC(Terraform, CloudFormation)로 자동화하더라도 LBC 대비 리소스가 분리되어 관리 복잡  
+- 운영 중 NodePort 범위 충돌, 포트 관리 이슈 발생 가능  
+
+---
+
+## ✅ 결론
+
+LBC 없이 NodePort만으로 운영할 경우,
+**단기 테스트나 내부 전용 환경**에는 적합하지만  
+**프로덕션(Production) 환경에서는 다음 이유로 비추천**됩니다.
+
+| 항목 | NodePort만 사용 시 문제점 |
+|------|----------------------------|
+| 확장성 | 오토스케일링 시 Target Group 갱신 불가 |
+| 보안성 | SG/SSL/WAF 등 수동 설정 필요 |
+| 가용성 | 노드 교체/재시작 시 연결 단절 가능 |
+| 운영성 | 모니터링, 헬스체크, 로그 수집 제한 |
+| 유지보수 | IaC 관리 복잡, 포트 관리 어려움 |
+
+---
