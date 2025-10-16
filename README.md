@@ -25,8 +25,9 @@ AWS EKS 환경에서 **Application Load Balancer(ALB)** 를 사용하지만
 #### ✅ (1) SG 자동 생성 및 최소 권한 규칙 적용
 - LBC는 Ingress 또는 Service 리소스를 생성할 때,  
   필요한 **최소 범위의 보안그룹 규칙만 자동 생성**합니다.
-- 예: ALB → Pod 간 트래픽을 위한 NodePort 접근만 허용하는 **세분화된 규칙** 생성  
+- EKS - Pod 간 트래픽을 위한  **세분화된 규칙** 생성 (sg-0c66ca6c8a7a17e3c EKS cotrolplane crossed ENI )
 - 서비스별로 별도의 SG를 자동 분리하여, 다른 서비스로의 트래픽 오남용을 방지
+- Client -> ALB 간  inbound 트래픽 (k8s-default-svcnlbip-92d5da1bbd) 
 
 > 📘 이점:  
 > - 인바운드/아웃바운드 규칙을 최소화 (Principle of Least Privilege)  
