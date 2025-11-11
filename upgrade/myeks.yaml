@@ -1,0 +1,115 @@
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+metadata:
+  name: myeks
+  region: ap-northeast-2
+  version: "1.31"
+
+iam:
+  withOIDC: true
+
+  serviceAccounts:
+  - metadata:
+      name: aws-load-balancer-controller
+      namespace: kube-system
+    wellKnownPolicies:
+      awsLoadBalancerController: true
+
+vpc:
+  cidr: 192.168.0.0/16
+  clusterEndpoints:
+    privateAccess: true
+    publicAccess: true
+  id: vpc-0c2a61d76c498382e
+  subnets:
+    public:
+      ap-northeast-2a:
+        az: ap-northeast-2a
+        cidr: 192.168.1.0/24
+        id: subnet-0a5c23c8644f12b4f
+      ap-northeast-2b:
+        az: ap-northeast-2b
+        cidr: 192.168.2.0/24
+        id: subnet-059ad8cf73e4e7efd
+      ap-northeast-2c:
+        az: ap-northeast-2c
+        cidr: 192.168.3.0/24
+        id: subnet-0ed77a36cd37bd24a
+
+addons:
+  - name: vpc-cni # no version is specified so it deploys the default version
+    version: latest # auto discovers the latest available
+    attachPolicyARNs: # attach IAM policies to the add-on's service account
+      - arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy
+    configurationValues: |-
+      enableNetworkPolicy: "true"
+
+  - name: kube-proxy
+    version: latest
+
+  - name: coredns
+    version: latest
+
+  - name: metrics-server
+    version: latest
+
+  - name: aws-ebs-csi-driver
+    version: latest
+    wellKnownPolicies:
+      ebsCSIController: true
+
+managedNodeGroups:
+- amiFamily: AmazonLinux2023
+  desiredCapacity: 3
+  iam:
+    withAddonPolicies:
+      certManager: true
+      externalDNS: true
+  instanceType: t3.large
+  preBootstrapCommands:
+    # install additional packages
+    - "dnf install nvme-cli links tree tcpdump sysstat ipvsadm ipset bind-utils htop -y"
+  labels:
+    alpha.eksctl.io/cluster-name: myeks
+    alpha.eksctl.io/nodegroup-name: ng1
+  maxPodsPerNode: 60
+  maxSize: 3
+  minSize: 3
+  name: ng1
+  ssh:
+    allow: true
+    publicKeyName: koo-home-0928
+  tags:
+    alpha.eksctl.io/nodegroup-name: ng1
+    alpha.eksctl.io/nodegroup-type: managed
+  volumeIOPS: 3000
+  volumeSize: 60
+  volumeThroughput: 125
+  volumeType: gp3
+- amiFamily: AmazonLinux2023
+  desiredCapacity: 3
+  iam:
+    withAddonPolicies:
+      certManager: true
+      externalDNS: true
+  instanceType: t3.large
+  preBootstrapCommands:
+    # install additional packages
+    - "dnf install nvme-cli links tree tcpdump sysstat ipvsadm ipset bind-utils htop -y"
+  labels:
+    alpha.eksctl.io/cluster-name: myeks
+    alpha.eksctl.io/nodegroup-name: ng2
+  maxPodsPerNode: 60
+  maxSize: 3
+  minSize: 3
+  name: ng2
+  ssh:
+    allow: true
+    publicKeyName: koo-home-0928
+  tags:
+    alpha.eksctl.io/nodegroup-name: ng2
+    alpha.eksctl.io/nodegroup-type: managed
+  volumeIOPS: 3000
+  volumeSize: 60
+  volumeThroughput: 125
+  volumeType: gp3
