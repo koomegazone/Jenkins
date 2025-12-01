@@ -20,21 +20,21 @@ vpc:
   clusterEndpoints:
     privateAccess: true
     publicAccess: true
-  id: vpc-0c2a61d76c498382e
+  id: vpc-08b846e1d37af6ca7
   subnets:
     public:
       ap-northeast-2a:
         az: ap-northeast-2a
         cidr: 192.168.1.0/24
-        id: subnet-0a5c23c8644f12b4f
+        id: subnet-095003f3d8c723acd
       ap-northeast-2b:
         az: ap-northeast-2b
         cidr: 192.168.2.0/24
-        id: subnet-059ad8cf73e4e7efd
+        id: subnet-0c3fffbb6c87a9560
       ap-northeast-2c:
         az: ap-northeast-2c
         cidr: 192.168.3.0/24
-        id: subnet-0ed77a36cd37bd24a
+        id: subnet-04958c29c60ff3c2f
 
 addons:
   - name: vpc-cni # no version is specified so it deploys the default version
@@ -63,6 +63,7 @@ managedNodeGroups:
   desiredCapacity: 3
   iam:
     withAddonPolicies:
+      autoScaler: true
       certManager: true
       externalDNS: true
   instanceType: t3.large
@@ -86,10 +87,13 @@ managedNodeGroups:
   volumeSize: 60
   volumeThroughput: 125
   volumeType: gp3
+
+
 - amiFamily: AmazonLinux2023
-  desiredCapacity: 3
+  desiredCapacity: 1
   iam:
     withAddonPolicies:
+      autoScaler: true
       certManager: true
       externalDNS: true
   instanceType: t3.large
@@ -98,7 +102,7 @@ managedNodeGroups:
     - "dnf install nvme-cli links tree tcpdump sysstat ipvsadm ipset bind-utils htop -y"
   labels:
     alpha.eksctl.io/cluster-name: myeks
-    alpha.eksctl.io/nodegroup-name: ng2
+    alpha.eksctl.io/nodegroup-name: ng1
   maxPodsPerNode: 60
   maxSize: 3
   minSize: 3
