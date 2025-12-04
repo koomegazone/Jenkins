@@ -1,0 +1,9 @@
+curl -XPUT "https://search-newtest-dgiheqvqtxkbaolzzdh2gdwja4.ap-northeast-2.es.amazonaws.com/_snapshot/my_repo" -H 'Content-Type: application/json' -d'
+{
+  "type": "s3",
+  "settings": {
+    "bucket": "test-opensearch-koo",
+    "region": "ap-northeast-2",
+    "role_arn": "arn:aws:iam::064711168361:role/TheSnapshotRole"
+  }
+}'
