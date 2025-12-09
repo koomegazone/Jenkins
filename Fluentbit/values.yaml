@@ -1,0 +1,53 @@
+config:
+  service: |
+    [SERVICE]
+        Daemon Off
+        Flush 1
+        Log_Level info
+        Parsers_File /fluent-bit/etc/parsers.conf
+        Parsers_File /fluent-bit/etc/conf/custom_parsers.conf
+        HTTP_Server On
+        HTTP_Listen 0.0.0.0
+        HTTP_Port 2020
+        Health_Check On
+
+  inputs: |
+    [INPUT]
+        Name tail
+        Path /var/log/containers/*.log
+        multiline.parser docker, cri
+        Tag opensearch
+        Mem_Buf_Limit 5MB
+        Skip_Long_Lines On
+
+    [INPUT]
+        Name systemd
+        Tag opensearch
+        Systemd_Filter _SYSTEMD_UNIT=kubelet.service
+        Read_From_Tail On
+
+  filters: |
+    [FILTER]
+        Name kubernetes
+        Match opensearch
+        Merge_Log On
+        Keep_Log Off
+        K8S-Logging.Parser On
+        K8S-Logging.Exclude On
+
+  outputs: |
+    [OUTPUT]
+        Name opensearch
+        Match opensearch
+        Host search-newtest-dgiheqvqtxkbaolzzdh2gdwja4.ap-northeast-2.es.amazonaws.com
+        Port 443
+        Index kube-system-%Y%m%d
+        Type _doc
+        tls On
+        tls.verify Off
+        Suppress_Type_Name On
+        AWS_Auth Off
+        AWS_Region ap-northeast-2
+        Http_User admin
+        Http_Passwd Megazone00!!!
+        Retry_Limit 2
