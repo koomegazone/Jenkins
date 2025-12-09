@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: nginx-to-scaleout
 spec:
-  replicas: 1
+  replicas: 15
   selector:
     matchLabels:
       app: nginx
