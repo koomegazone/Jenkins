@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: memory-stress-slow
+spec:
+  restartPolicy: Never
+  containers:
+  - name: memory-stress-ctr
+    image: polinux/stress
+    command: ["stress"]
+    args:
+      - "--vm"
+      - "45"
+      - "--vm-bytes"
+      - "300M"     # 기존보다 작게 시작
+      - "--vm-hang"
+      - "1"
+    resources:
+      limits:
+        memory: 10Gi
+      requests:
+        memory: 256Mi
+

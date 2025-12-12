@@ -9,10 +9,10 @@ spec:
   - name: memory-stress-ctr
     image: polinux/stress
     command: ["stress"]
-    args: ["--vm", "1", "--vm-bytes", "1G", "--vm-hang", "1"]
+    args: ["--vm", "5", "--vm-bytes", "1G", "--vm-hang", "1"]
     resources:
       limits:
-        memory: 1536Mi
+        memory: 10000Mi
       requests:
         memory: 512Mi
 
