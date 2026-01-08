@@ -3,6 +3,11 @@ kind: Pod
 metadata:
   name: app1
 spec:
+  tolerations:
+  - key: "service"
+    operator: "Equal"
+    value: "efs"
+    effect: "NoSchedule"
   containers:
   - name: app1
     image: busybox
