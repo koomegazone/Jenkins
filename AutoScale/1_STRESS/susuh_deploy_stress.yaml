@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: memory-stress-slow
+  namespace: kube-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: memory-stress-slow
+  template:
+    metadata:
+      labels:
+        app: memory-stress-slow
+    spec:
+      restartPolicy: Always
+      containers:
+      - name: memory-stress-ctr
+        image: polinux/stress-ng
+        command: ["stress-ng"]
+        args:
+          - "--vm"
+          - "1"
+          - "--vm-bytes"
+          - "200M"        # 초기 메모리
+          - "--vm-keep"
+          - "--vm-inc"
+          - "100M"        # 100MB씩 증가
+          - "--timeout"
+          - "600s"        # 10분 동안 점진적으로 증가
+        resources:
+          limits:
+            memory: 10Gi
+          requests:
+            memory: 256Mi
+

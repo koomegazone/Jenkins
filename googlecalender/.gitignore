@@ -1,0 +1,25 @@
+# Google Calendar API 인증 파일 (민감 정보)
+credentials.json
+token.pickle
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+build/
+dist/
+*.egg-info/
+
+# macOS
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo

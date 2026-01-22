@@ -1,0 +1,52 @@
+            # Install krew
+            curl -L https://github.com/kubernetes-sigs/krew/releases/download/v0.4.4/krew-linux_amd64.tar.gz -o /root/krew-linux_amd64.tar.gz
+            tar zxvf krew-linux_amd64.tar.gz
+            ./krew-linux_amd64 install krew
+            export PATH="$PATH:/root/.krew/bin"
+            echo 'export PATH="$PATH:/root/.krew/bin:/root/go/bin"' >> /etc/profile
+
+            # Install krew plugin
+            kubectl krew install ctx ns get-all neat df-pv stern oomd view-secret # ktop tree
+
+            # Install Docker & Docker-compose
+            amazon-linux-extras install docker -y
+            systemctl start docker && systemctl enable docker
+            curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+            chmod +x /usr/local/bin/docker-compose
+
+            # Install Kubecolor
+            wget https://github.com/kubecolor/kubecolor/releases/download/v0.5.0/kubecolor_0.5.0_linux_amd64.tar.gz
+            tar -zxvf kubecolor_0.5.0_linux_amd64.tar.gz
+            mv kubecolor /usr/local/bin/
+
+            # Install Kind
+            curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.27.0/kind-linux-amd64
+            chmod +x ./kind
+            mv ./kind /usr/local/bin/kind
+
+            # Install eks-node-viewer
+            yum install golang -y
+            go install github.com/awslabs/eks-node-viewer/cmd/eks-node-viewer@latest
+
+            # git clone VPA
+            git clone https://github.com/kubernetes/autoscaler.git
+
+            echo 'Userdata End!'
+
+
+            # Install kubectl & helm
+            cd /root
+            curl -O https://s3.us-west-2.amazonaws.com/amazon-eks/1.31.2/2024-11-15/bin/linux/amd64/kubectl
+            install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+            curl -s https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
+
+            # Install eksctl
+            curl -sL "https://github.com/eksctl-io/eksctl/releases/latest/download/eksctl_Linux_amd64.tar.gz" | tar xz -C /tmp
+            mv /tmp/eksctl /usr/local/bin
+
+            # Install aws cli v2
+            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+            unzip awscliv2.zip >/dev/null 2>&1
+            ./aws/install
+            complete -C '/usr/local/bin/aws_completer' aws
+            echo 'export AWS_PAGER=""' >>/etc/profile

@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-app
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app.kubernetes.io/name=istmtsm
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name=istmtsm
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: In
+                values:
+                - itsmtsm
+            topologyKey: kubernetes.io/hostname
+      containers:
+      - name: app
+        image: nginx
+
