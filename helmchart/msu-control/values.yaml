@@ -103,4 +103,4 @@ tolerations: []
 
 affinity:
   podAntiAffinity:
-    enabled: true
+    enabled: false
