@@ -234,17 +234,19 @@ echo "----------------------------------------"
 # 기존 리소스 정리
 cleanup_resource pod internet-test
 
-echo "Internet 접근 테스트..."
-kubectl run internet-test --image=curlimages/curl --restart=Never -- curl -I https://google.com --max-time 10
+echo "Internet 접근 테스트 (5초 timeout)..."
+kubectl run internet-test --image=curlimages/curl --restart=Never -- curl -I https://google.com --max-time 5
 
 if wait_for_pod internet-test; then
-    sleep 2
-    kubectl logs internet-test &>/dev/null
+    # 5초 timeout으로 로그 확인
+    echo "응답 대기 중 (최대 5초)..."
+    timeout 5 bash -c 'while ! kubectl logs internet-test 2>/dev/null | grep -q "HTTP"; do sleep 0.5; done' &>/dev/null
+    
     if [ $? -eq 0 ]; then
         echo -e "${GREEN}✓ Internet 접근 정상${NC}"
         PASSED_TESTS+=("Internet 접근")
     else
-        echo -e "${RED}✗ Internet 접근 실패 (Outbound 443 차단 가능성)${NC}"
+        echo -e "${RED}✗ Internet 접근 실패 (5초 timeout - Outbound 443 차단 가능성)${NC}"
         FAILED_TESTS+=("Internet 접근")
     fi
 else
