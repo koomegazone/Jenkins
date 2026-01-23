@@ -7,9 +7,9 @@
 | 1 | Node → Cluster (443) | `kubectl get nodes` | Ready | NotReady |
 | 2 | Cluster → Node (10250) | `kubectl exec -it pod -- sh` | 쉘 접속 | timeout |
 | 3 | Cluster → Node (443) | Webhook 설치 후 Pod 생성 | 정상 생성 | webhook error |
-| 4 | Node ↔ Node (DNS) | `kubectl run test --image=busybox -it --rm -- nslookup kubernetes.default` | IP 응답 | timeout |
-| 5 | Node ↔ Node (Pod) | Service 생성 후 `wget http://service` | HTML 응답 | timeout |
-| 6 | Node ↔ Node (Metrics) | `kubectl top nodes` | 메트릭 표시 | ServiceUnavailable |
+| 4 | Node ↔ Node (DNS) | `kubectl run test --image=busybox -it --rm -- nslookup kubernetes.default` | IP 응답, coredns 재기동 필요 | timeout |
+| 5 | Node ↔ Node (Pod) | Service 생성 후 `wget http://service` | webhook 사용, Node-Node all port, Cluster->Node webhook 9443 | timeout |
+| 6 | Node ↔ Node (Metrics) | `kubectl top nodes` | 메트릭 표시,  | ServiceUnavailable |
 | 7 | Node → AWS (ECR) | ECR 이미지로 Pod 생성 | 정상 실행 | ImagePullBackOff |
 | 8 | Node → Internet | `kubectl run test --image=busybox -it --rm -- wget -O- https://google.com` | HTML 응답 | timeout |
 
