@@ -1,10 +1,13 @@
 #!/bin/bash
 
 # EKS 클러스터 생성 전 사전 리소스 생성 스크립트
-# 사용법: ./eks-pre-setup.sh <서비스명> <환경>
-# 예시: ./eks-pre-setup.sh prism prd
+# 사용법: ./eks-pre-setup.sh <서비스명> <환경> <VPC_ID>
+# 예시: ./eks-pre-setup.sh prism prd vpc-1234567890abcdef0
 
 set -e
+
+# AWS CLI 페이저 비활성화
+export AWS_PAGER=""
 
 # 색상 정의
 RED='\033[0;31m'
@@ -14,20 +17,28 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # 파라미터 체크
-if [ $# -ne 2 ]; then
-    echo -e "${RED}사용법: $0 <서비스명> <환경>${NC}"
-    echo "예시: $0 prism prd"
-    echo "환경: prd, stg, dev 중 하나"
+if [ $# -ne 3 ]; then
+    echo -e "${RED}사용법: $0 <서비스명> <환경> <VPC_ID>${NC}"
+    echo "예시: $0 prism prd vpc-1234567890abcdef0"
+    echo "환경: prd, stg, dev, q 중 하나"
     exit 1
 fi
 
 SERVICE_NAME=$1
 ENV=$2
+VPC_ID=$3
 REGION="an2"  # ap-northeast-2
 
 # 환경 검증
 if [[ ! "$ENV" =~ ^(prd|stg|dev|q)$ ]]; then
     echo -e "${RED}환경은 prd, stg, dev, q 중 하나여야 합니다.${NC}"
+    exit 1
+fi
+
+# VPC ID 형식 검증
+if [[ ! "$VPC_ID" =~ ^vpc-[0-9a-f]{8,17}$ ]]; then
+    echo -e "${RED}VPC ID 형식이 올바르지 않습니다: $VPC_ID${NC}"
+    echo "올바른 형식: vpc-1234567890abcdef0"
     exit 1
 fi
 
@@ -67,19 +78,13 @@ echo ""
 echo "서비스명: ${SERVICE_NAME}"
 echo "환경: ${ENV}"
 echo "리전: ap-northeast-2"
+echo "VPC ID: ${VPC_ID}"
 echo ""
 
-# VPC ID 입력 받기
-read -p "VPC ID를 입력하세요: " VPC_ID
-
-if [ -z "$VPC_ID" ]; then
-    echo -e "${RED}VPC ID는 필수입니다.${NC}"
-    exit 1
-fi
-
 # VPC 존재 확인
+echo "VPC 확인 중..."
 if ! aws ec2 describe-vpcs --vpc-ids $VPC_ID --region ap-northeast-2 &>/dev/null; then
-    echo -e "${RED}VPC ID가 존재하지 않습니다: $VPC_ID${NC}"
+    echo -e "${RED}✗ VPC ID가 존재하지 않습니다: $VPC_ID${NC}"
     exit 1
 fi
 
@@ -164,14 +169,20 @@ create_cluster_role() {
     if aws iam get-role --role-name $role_name &>/dev/null; then
         echo -e "${YELLOW}  ⚠ 이미 존재합니다. 스킵${NC}"
     else
+        echo "  - Role 생성 중..."
         aws iam create-role \
             --role-name $role_name \
             --assume-role-policy-document file:///tmp/eks-cluster-trust-policy.json \
-            --tags Key=Name,Value=$role_name Key=Service,Value=$SERVICE_NAME Key=Environment,Value=$ENV
+            --tags Key=Name,Value=$role_name Key=Service,Value=$SERVICE_NAME Key=Environment,Value=$ENV \
+            > /dev/null
         
+        echo "  - 정책 연결 중 (AmazonEKSClusterPolicy)..."
         aws iam attach-role-policy \
             --role-name $role_name \
             --policy-arn arn:aws:iam::aws:policy/AmazonEKSClusterPolicy
+        
+        echo "  - IAM propagation 대기 (3초)..."
+        sleep 3
         
         echo -e "${GREEN}  ✓ 생성 완료${NC}"
     fi
@@ -182,33 +193,68 @@ create_node_role() {
     local role_name=$1
     echo -e "${YELLOW}노드 IAM Role 생성: $role_name${NC}"
     
-    if aws iam get-role --role-name $role_name &>/dev/null; then
-        echo -e "${YELLOW}  ⚠ 이미 존재합니다. 스킵${NC}"
-    else
+    # Role 존재 여부 확인
+    if ! aws iam get-role --role-name $role_name &>/dev/null; then
+        echo "  - Role 생성 중..."
         aws iam create-role \
             --role-name $role_name \
             --assume-role-policy-document file:///tmp/eks-node-trust-policy.json \
-            --tags Key=Name,Value=$role_name Key=Service,Value=$SERVICE_NAME Key=Environment,Value=$ENV
-        
-        # 필수 정책 연결
-        aws iam attach-role-policy \
-            --role-name $role_name \
-            --policy-arn arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy
-        
-        aws iam attach-role-policy \
-            --role-name $role_name \
-            --policy-arn arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy
-        
-        aws iam attach-role-policy \
-            --role-name $role_name \
-            --policy-arn arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly
-        
-        aws iam attach-role-policy \
-            --role-name $role_name \
-            --policy-arn arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
-        
-        echo -e "${GREEN}  ✓ 생성 완료${NC}"
+            --tags Key=Name,Value=$role_name Key=Service,Value=$SERVICE_NAME Key=Environment,Value=$ENV \
+            > /dev/null
+        echo -e "${GREEN}  ✓ Role 생성 완료${NC}"
+    else
+        echo -e "${YELLOW}  ⚠ Role이 이미 존재합니다${NC}"
     fi
+    
+    # 필요한 정책 목록
+    local required_policies=(
+        "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
+        "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
+        "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
+        "arn:aws:iam::aws:policy/AmazonS3FullAccess"
+        "arn:aws:iam::aws:policy/AmazonEC2FullAccess"
+    )
+    
+    # 제거해야 할 정책 목록
+    local deprecated_policies=(
+        "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+    )
+    
+    # 현재 연결된 정책 조회
+    local current_policies=$(aws iam list-attached-role-policies --role-name $role_name --query 'AttachedPolicies[].PolicyArn' --output text)
+    
+    echo "  - 정책 점검 및 적용 중..."
+    
+    # 필요한 정책 연결
+    for policy_arn in "${required_policies[@]}"; do
+        local policy_name=$(echo $policy_arn | awk -F'/' '{print $NF}')
+        if echo "$current_policies" | grep -q "$policy_arn"; then
+            echo "    ✓ $policy_name (이미 연결됨)"
+        else
+            echo "    + $policy_name 연결 중..."
+            aws iam attach-role-policy \
+                --role-name $role_name \
+                --policy-arn $policy_arn
+            echo "    ✓ $policy_name 연결 완료"
+        fi
+    done
+    
+    # 불필요한 정책 제거
+    for policy_arn in "${deprecated_policies[@]}"; do
+        if echo "$current_policies" | grep -q "$policy_arn"; then
+            local policy_name=$(echo $policy_arn | awk -F'/' '{print $NF}')
+            echo "    - $policy_name 제거 중..."
+            aws iam detach-role-policy \
+                --role-name $role_name \
+                --policy-arn $policy_arn
+            echo "    ✓ $policy_name 제거 완료"
+        fi
+    done
+    
+    echo "  - IAM propagation 대기 (2초)..."
+    sleep 2
+    
+    echo -e "${GREEN}  ✓ 정책 점검 완료${NC}"
 }
 
 # 클러스터 Role 생성

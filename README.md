@@ -34,5 +34,11 @@
 - **리소스 사용률 리포팅** - Kubecost 같은 도구로 팀별 비용 가시성
 
 ---
-
+```
+CLUSTER_SG=$(aws eks describe-cluster --name myeks \
+  --query 'cluster.resourcesVpcConfig.clusterSecurityGroupId' --output text)
+NODE_SG=$(aws ec2 describe-instances \
+  --filters "Name=tag:eks:cluster-name,Values=myeks" \
+  --query 'Reservations[0].Instances[0].SecurityGroups[0].GroupId' --output text)
+```
 
