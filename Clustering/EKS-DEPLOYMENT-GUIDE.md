@@ -8,7 +8,6 @@
 5. [Phase 4. Launch Template 생성](#phase-4-launch-template-생성)
 6. [Phase 5. 노드 그룹 생성](#phase-5-노드-그룹-생성)
 7. [Phase 6. Workbench 설정](#phase-6-workbench-설정)
-8. [Phase 7. 애플리케이션 배포](#phase-7-애플리케이션-배포)
 
 ---
 
@@ -440,70 +439,6 @@ kubectl cluster-info
 
 # Add-on 확인
 kubectl get pods -n kube-system
-```
-
----
-
-## Phase 7. 애플리케이션 배포
-
-### 7.1 Namespace 생성
-
-```bash
-# Front Cluster
-kubectl ctx front
-kubectl create namespace prism-front-app
-kubectl create namespace prism-front-mgmt
-
-# Back Cluster
-kubectl ctx back
-kubectl create namespace prism-back-app
-kubectl create namespace prism-back-mgmt
-```
-
-### 7.2 ConfigMap 및 Secret 생성
-
-```bash
-# ConfigMap 생성
-kubectl create configmap app-config \
-  --from-literal=ENV=q \
-  --from-literal=REGION=ap-northeast-2 \
-  -n prism-front-app
-
-# Secret 생성
-kubectl create secret generic app-secret \
-  --from-literal=db-password=your-password \
-  -n prism-front-app
-```
-
-### 7.3 Helm Chart 배포
-
-```bash
-# Front App 배포
-helm install prism-front-app ./helmchart/msu-control \
-  -n prism-front-app \
-  -f values-front-q.yaml
-
-# Back App 배포
-kubectl ctx back
-helm install prism-back-app ./helmchart/msu-control \
-  -n prism-back-app \
-  -f values-back-q.yaml
-```
-
-### 7.4 배포 확인
-
-```bash
-# Pod 상태 확인
-kubectl get pods -n prism-front-app -o wide
-
-# Service 확인
-kubectl get svc -n prism-front-app
-
-# Ingress/ALB 확인
-kubectl get ingress -n prism-front-app
-
-# 로그 확인
-kubectl logs -f <pod-name> -n prism-front-app
 ```
 
 ---
