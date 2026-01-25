@@ -1,10 +1,14 @@
 # IRSA 만들기 스크립트
 
 ```
-# Phase 1 - Front 클러스터 (prismfo)
+# Phase 1 - 권한 부여
+chmod +x helmchart/create-irsa.sh
+
+
+# Phase 2 - Front 클러스터 (prismfo)
 ./helmchart/create-irsa.sh prism-q-an2-eks-cluster-front prismfo
 
-# Phase 2 - Back 클러스터 (prismbo, prismopenapi, prismbatch)
+# Phase 3 - Back 클러스터 (prismbo, prismopenapi, prismbatch)
 ./helmchart/create-irsa.sh prism-q-an2-eks-cluster-back prismbo
 ./helmchart/create-irsa.sh prism-q-an2-eks-cluster-back prismopenapi
 ./helmchart/create-irsa.sh prism-q-an2-eks-cluster-back prismbatch
