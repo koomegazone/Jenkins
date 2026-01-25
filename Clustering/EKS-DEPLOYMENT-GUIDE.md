@@ -495,12 +495,6 @@ kubectl get events -A --sort-by='.lastTimestamp'
 - 40022 포트로 접속 시도
 - 키 페어 권한 확인 (chmod 400)
 
----
-
-**작성일**: 2026-01-25  
-**작성자**: DevOps Team  
-**버전**: 2.0 (AWS 콘솔 기반)
-
 ### 1.1 eksctl 설치 확인
 ```bash
 eksctl version
