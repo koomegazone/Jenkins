@@ -9,37 +9,53 @@ apiVersion: node.eks.aws/v1alpha1
 kind: NodeConfig
 spec:
   cluster:
-    apiServerEndpoint: https://020650F264DD50B9D6DF9246D81780C4.gr7.ap-northeast-2.eks.amazonaws.com
-    certificateAuthority: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURCVENDQWUyZ0F3SUJBZ0lJV2pPUGtmNU9CTUV3RFFZSktvWklodmNOQVFFTEJRQXdGVEVUTUJFR0ExVUUKQXhNS2EzVmlaWEp1WlhSbGN6QWVGdzB5TlRFeE1EUXdOekUyTURKYUZ3MHpOVEV4TURJd056SXhNREphTUJVeApFekFSQmdOVkJBTVRDbXQxWW1WeWJtVjBaWE13Z2dFaU1BMEdDU3FHU0liM0RRRUJBUVVBQTRJQkR3QXdnZ0VLCkFvSUJBUUN2ODcvUFpoN3FHUmc0RFg1ZzVTMU5YZGxVWUIzNFU2UlhjSkFhTXdWdlBSQ1RvNGIwR2xsQWVreS8KSzU0ZWUzUy9CZWp1ODludytvMFFzODlzWVJDbEFiWkhhbUQ4QVloUVJyWEFkWXdUTmF6TFIvZFpxQjRqczBvRAppK205WEVJNkN5ODViV1VKc3ErMEF5WUo0ZkpBU0ZESGRjdGYzTDFvbEhxT2NKVUxXUXZUZE1QcURCd2lIVTNDCkl3eis4UXluTDRrZmtGT2hoVGpmYWpQd3NUVlZuZVVveExWZm5neEY0RFk0ekY0ZUNSMVlRK2owSVFMMFdIazQKQ25kdGFmcXFBM3o5VEYydzYzbVExNUczTFVqWTJaNDB6MklqcWZ4cGsvc0UycGxraU10UGlibGZWVFJ1RnozZAp0WWZZS1JuQUJpNWdaYXdDbU5lVDF0anBBNitUQWdNQkFBR2pXVEJYTUE0R0ExVWREd0VCL3dRRUF3SUNwREFQCkJnTlZIUk1CQWY4RUJUQURBUUgvTUIwR0ExVWREZ1FXQkJUVDFWVy9JYkYzbTVEREhWdW55WTlNbTE3RDd6QVYKQmdOVkhSRUVEakFNZ2dwcmRXSmxjbTVsZEdWek1BMEdDU3FHU0liM0RRRUJDd1VBQTRJQkFRQ1d5SzZyaE1PMgpmZG5maHV3QXhrdFYzYzYxcHRZb01CRHQ1RGFESG1nWnRTem9EYkFDVEo1MSszNUV4bnQ0dk4rdmp0dDZPeGlaCk16d1grTFI2SXdrOEplUzN6eCtwQ05iQWcwamltSUdvNFBVNkYwUUVxVTdWL0pWVWtLN3lkdUhkSUJCN0xucDgKUG1LdEFKNVNiN1hITm5NdERCZUJsNHpUTEdTaStHZ1h3MHN0NGZ3Mkp6cHZOWXVsbTVJN1B1TTlseHZkWEpuZAo2bTNNZkRtNDFSUnpzR2htN05FenRtbnFCNldkTHR6RG5FS01kNEc3M0syRFFTUlBsSWg3MzJua1JLVGVRNG9UClVHc0xPRW9lUHJ2MytraEhOWnllVkpNdWd1VVdCNmdQQlYwYmE3ZTlDZCtQWTVCREdldU5YbzQ4RlR2TWJrRm8Kdk95SERyNi8yWWxTCi0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K
+    apiServerEndpoint: https://xxx
+    certificateAuthority: xxx
     cidr: 10.100.0.0/16
-    name: myeks
+    name: prism-q-an2-eks-cluster-front
   kubelet:
     config:
-      maxPods: 35
+      maxPods: 17
       clusterDNS:
       - 10.100.0.10
     flags:
-    - "--node-labels=eks.amazonaws.com/sourceLaunchTemplateVersion=1,alpha.eksctl.io/cluster-name=myeks,alpha.eksctl.io/nodegroup-name=ng2,eks.amazonaws.com/nodegroup-image=ami-066708e0d044af696,eks.amazonaws.com/capacityType=ON_DEMAND,eks.amazonaws.com/nodegroup=ng2,eks.amazonaws.com/sourceLaunchTemplateId=lt-0bc957d4082ef9075"
+    - "--node-labels=eks.amazonaws.com/nodegroup-image=ami-0363c32753eb57bbd,eks.amazonaws.com/capacityType=ON_DEMAND,eks.amazonaws.com/nodegroup=prism-q-an2-ng-eks-front-node-app"
 
 --//
-Content-Type: text/x-shellscript
-Content-Type: charset="us-ascii"
+Content-Type: text/x-shellscript;
 
 #!/bin/bash
-dnf install nvme-cli links tree tcpdump sysstat ipvsadm ipset bind-utils htop -y
---//
-Content-Type: application/node.eks.aws
+  set -o xtrace
 
-apiVersion: node.eks.aws/v1alpha1
-kind: NodeConfig
-metadata: {}
-spec:
-  cluster: {}
-  containerd: {}
-  instance:
-    localStorage: {}
-  kubelet:
-    config:
-      maxPods: 60
+EC2_NAME_PREFIX="prism-q-an2-ec2-l-eks-front-app"
+VOL_NAME_PREFIX="prism-q-an2-vol-eks-front-app"
+SERVICE_TAG="prism"
+EKS_CLUSTER_NAME="prism-q-an2-eks-cluster-front"
+
+#tag
+EC2_IP=$(ifconfig eth0 | grep -w inet | awk '{ print $2 }'  | tr '.' '-' )
+if  [ -z $EC2_IP ]; then
+    EC2_IP=$(ifconfig ens5 | grep -w inet | awk '{ print $2 }'  | tr '.' '-' )
+fi
+EC2_NAME=$EC2_NAME_PREFIX"-"$EC2_IP
+TOKEN=`curl -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600"`
+EC2_ID=`curl -H "X-aws-ec2-metadata-token: $TOKEN" -v http://169.254.169.254/latest/meta-data/instance-id/`
+#ebs root only
+VOL_ID=`aws ec2 describe-instances --instance-ids ${EC2_ID} --region ap-northeast-2 --query 'Reservations[0].Instances[0].BlockDeviceMappings[0].Ebs.VolumeId' | sed 's/\"//g'`
+VOL_NAME=$VOL_NAME_PREFIX"-"$EC2_IP"-root-vol"
+echo $(aws ec2  create-tags --resources ${EC2_ID} --tags Key="Name",Value=$EC2_NAME Key="Service",Value=$SERVICE_TAG   --region ap-northeast-2)
+echo $(aws ec2  create-tags --resources ${VOL_ID}  --tags Key=Name,Value=$VOL_NAME Key="Service",Value=$SERVICE_TAG    --region ap-northeast-2)
+
+#OS Security
+# aws s3 cp s3://ai-app-p-an2-s3-userdata/os_security.sh /root/os_security.sh
+aws s3 cp s3://prism-q-an2-s3-userdata/os_security.sh /root/os_security.sh
+chmod 755 /root/os_security.sh
+sh /root/os_security.sh
+
+#OS_User setting
+# aws s3 cp s3://ai-app-p-an2-s3-userdata/os_user.sh /root/os_user.sh
+aws s3 cp s3://prism-q-an2-s3-userdata/os_user.sh /root/os_user.sh
+chmod 755 /root/os_user.sh
+sh /root/os_user.sh
 
 --//--
