@@ -50,13 +50,26 @@ spec:
             {{- toYaml .Values.readinessProbe | nindent 12 }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
-          {{- with .Values.volumeMounts }}
+          {{- if or .Values.volumeMounts .Values.persistence.enabled }}
           volumeMounts:
+          {{- with .Values.volumeMounts }}
             {{- toYaml . | nindent 12 }}
           {{- end }}
-      {{- with .Values.volumes }}
+          {{- if .Values.persistence.enabled }}
+            - name: data
+              mountPath: /data
+          {{- end }}
+          {{- end }}
+      {{- if or .Values.volumes .Values.persistence.enabled }}
       volumes:
+      {{- with .Values.volumes }}
         {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.persistence.enabled }}
+        - name: data
+          persistentVolumeClaim:
+            claimName: {{ .Values.persistence.existingClaim | default (include "msu-control.fullname" .) }}
+      {{- end }}
       {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:

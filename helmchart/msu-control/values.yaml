@@ -104,3 +104,12 @@ tolerations: []
 affinity:
   podAntiAffinity:
     enabled: false
+
+# Persistent Volume Claim
+persistence:
+  enabled: true
+  # storageClass: "gp3"
+  accessMode: ReadWriteOnce
+  size: 10Gi
+  # annotations: {}
+  # existingClaim: ""
