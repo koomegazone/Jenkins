@@ -21,7 +21,9 @@ OpenSearch Dashboards → Security → Roles → Create role
 PUT _plugins/_security/api/roles/devpm_role
 {
   "cluster_permissions": [
-    "cluster_composite_ops_ro"
+    "cluster_composite_ops_ro",
+    "cluster:monitor/main",
+    "cluster:monitor/health"
   ],
   "index_permissions": [
     {
@@ -32,10 +34,31 @@ PUT _plugins/_security/api/roles/devpm_role
         "read",
         "search",
         "get",
-        "indices:data/read/search",
-        "indices:data/read/get",
+        "indices:data/read/*",
         "indices:admin/mappings/get",
-        "indices:admin/get"
+        "indices:admin/mappings/fields/get",
+        "indices:admin/get",
+        "indices:admin/exists",
+        "indices:admin/types/exists",
+        "indices:admin/validate/query",
+        "indices:monitor/stats"
+      ]
+    },
+    {
+      "index_patterns": [
+        ".kibana*",
+        ".opensearch_dashboards*"
+      ],
+      "allowed_actions": [
+        "read",
+        "write",
+        "delete",
+        "indices:data/read/*",
+        "indices:data/write/*",
+        "indices:admin/create",
+        "indices:admin/exists",
+        "indices:admin/mapping/put",
+        "indices:admin/mappings/get"
       ]
     }
   ],
@@ -45,7 +68,7 @@ PUT _plugins/_security/api/roles/devpm_role
         "global_tenant"
       ],
       "allowed_actions": [
-        "kibana_all_read"
+        "kibana_all_write"
       ]
     }
   ]
@@ -58,7 +81,9 @@ PUT _plugins/_security/api/roles/devpm_role
 PUT _plugins/_security/api/roles/prism_role
 {
   "cluster_permissions": [
-    "cluster_composite_ops_ro"
+    "cluster_composite_ops_ro",
+    "cluster:monitor/main",
+    "cluster:monitor/health"
   ],
   "index_permissions": [
     {
@@ -69,10 +94,31 @@ PUT _plugins/_security/api/roles/prism_role
         "read",
         "search",
         "get",
-        "indices:data/read/search",
-        "indices:data/read/get",
+        "indices:data/read/*",
         "indices:admin/mappings/get",
-        "indices:admin/get"
+        "indices:admin/mappings/fields/get",
+        "indices:admin/get",
+        "indices:admin/exists",
+        "indices:admin/types/exists",
+        "indices:admin/validate/query",
+        "indices:monitor/stats"
+      ]
+    },
+    {
+      "index_patterns": [
+        ".kibana*",
+        ".opensearch_dashboards*"
+      ],
+      "allowed_actions": [
+        "read",
+        "write",
+        "delete",
+        "indices:data/read/*",
+        "indices:data/write/*",
+        "indices:admin/create",
+        "indices:admin/exists",
+        "indices:admin/mapping/put",
+        "indices:admin/mappings/get"
       ]
     }
   ],
@@ -82,7 +128,7 @@ PUT _plugins/_security/api/roles/prism_role
         "global_tenant"
       ],
       "allowed_actions": [
-        "kibana_all_read"
+        "kibana_all_write"
       ]
     }
   ]
@@ -168,11 +214,26 @@ PUT _plugins/_security/api/rolesmapping/prism_role
   - `get`
   - `indices:data/read/*`
   - `indices:admin/mappings/get`
+  - `indices:admin/mappings/fields/get`
   - `indices:admin/get`
+  - `indices:admin/exists`
+  - `indices:monitor/stats`
+
+**추가 Index permissions** (Dashboard 사용을 위해):
+- Index patterns: `.kibana*`, `.opensearch_dashboards*`
+- Permissions:
+  - `read`
+  - `write`
+  - `delete`
+  - `indices:data/read/*`
+  - `indices:data/write/*`
+  - `indices:admin/create`
+  - `indices:admin/exists`
+  - `indices:admin/mapping/put`
 
 **Tenant permissions**:
 - Tenant pattern: `global_tenant`
-- Permissions: `kibana_all_read`
+- Permissions: `kibana_all_write`
 
 4. **Create** 클릭
 
