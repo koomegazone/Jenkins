@@ -34,10 +34,10 @@ config:
   outputs: |
     [OUTPUT]
         Name opensearch
-        Match opensearch
-        Host vpc-prism-q-an2-osr-5lpujbhxra64taa7srhc6fi3jm.ap-northeast-2.es.amazonaws.com
+        Match kube.*
+        Host search-samsungct-yl3pxho5owrsjcacjiybsfctl4.ap-northeast-2.es.amazonaws.com
         Port 443
-        Index kube-system-%Y%m%d
+        Index ai-app-d-devpm-%Y-%m-%d
         Type _doc
         tls On
         tls.verify Off
@@ -45,5 +45,5 @@ config:
         AWS_Auth Off
         AWS_Region ap-northeast-2
         Http_User admin
-        Http_Passwd !Admin$00
+        Http_Passwd Megazone00!!!
         Retry_Limit 2
