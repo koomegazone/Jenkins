@@ -87,18 +87,118 @@ outputs: |
 
 ## 3. 인덱스 패턴 생성 (OpenSearch Dashboards)
 
-### 3.1 인덱스 패턴 추가
+### 3.1 사용자별 Index Pattern 생성 가이드
 
+#### devpm 사용자로 Index Pattern 생성
+
+**Step 1: OpenSearch Dashboards 로그인**
 1. OpenSearch Dashboards 접속
-2. 좌측 메뉴에서 **Management** → **Index Patterns** 선택
+2. Username: `devpm`
+3. Password: 사용자 비밀번호 입력
+4. **Log in** 클릭
+
+**Step 2: Tenant 선택**
+1. 로그인 후 Tenant 선택 화면이 나타남
+2. **Global** 선택 (또는 Private tenant)
+3. **Confirm** 클릭
+
+**Step 3: Index Pattern 생성**
+1. 좌측 메뉴에서 **Management** 클릭
+2. **Dashboard Management** 섹션에서 **Index Patterns** 선택
+3. **Create index pattern** 버튼 클릭
+4. **Index pattern name** 입력: `ai-app-d-devpm-*`
+5. 매칭되는 인덱스 목록이 표시되는지 확인
+   - 예: `ai-app-d-devpm-2026-01-28`
+   - "No matching indices found" 메시지가 나오면 인덱스가 아직 생성되지 않은 것
+6. **Next step** 버튼 클릭
+7. **Time field** 선택: `@timestamp`
+8. **Create index pattern** 버튼 클릭
+
+**Step 4: 로그 확인 (Discover)**
+1. 좌측 메뉴에서 **Discover** 클릭
+2. 상단 Index pattern 드롭다운에서 `ai-app-d-devpm-*` 선택
+3. 시간 범위 설정 (우측 상단 시계 아이콘)
+   - Last 15 minutes
+   - Last 1 hour
+   - Last 24 hours
+   - 또는 Custom time range
+4. 로그 데이터 확인
+
+**Step 5: 필드 확인 및 필터링**
+1. 좌측 **Available fields** 패널에서 주요 필드 확인:
+   - `kubernetes.namespace_name`
+   - `kubernetes.pod_name`
+   - `kubernetes.container_name`
+   - `log` (실제 로그 메시지)
+2. 필드 클릭 → **Add** 버튼으로 컬럼 추가
+3. 검색창에서 KQL 쿼리로 필터링:
+   ```
+   kubernetes.namespace_name: "default"
+   kubernetes.pod_name: "my-app-*"
+   log: "error"
+   ```
+
+### 3.2 Admin 사용자로 Index Pattern 생성 (전체 인덱스 접근)
+
+1. OpenSearch Dashboards 접속 (admin 계정)
+2. 좌측 메뉴에서 **Management** → **Dashboard Management** → **Index Patterns** 선택
 3. **Create index pattern** 버튼 클릭
 4. 인덱스 패턴 입력: `ai-app-d-devpm-*`
 5. **Next step** 클릭
+6. Time field 선택: `@timestamp`
+7. **Create index pattern** 클릭
 
-### 3.2 Time Field 설정
+### 3.3 Index Pattern이 보이지 않는 경우
 
-1. Time field 선택: `@timestamp` (Fluentbit이 자동으로 추가)
-2. **Create index pattern** 클릭
+**문제**: "No matching indices found" 메시지가 표시됨
+
+**해결 방법**:
+
+1. **인덱스가 실제로 존재하는지 확인** (admin 계정으로 Dev Tools에서):
+```bash
+GET _cat/indices/ai-app-d-devpm-*?v
+```
+
+2. **Fluent Bit에서 데이터가 전송되고 있는지 확인**:
+```bash
+kubectl logs -n logging -l app.kubernetes.io/name=fluent-bit --tail=50
+```
+
+3. **권한 확인** (devpm 사용자로 Dev Tools에서):
+```bash
+GET ai-app-d-devpm-*/_search
+{
+  "size": 1
+}
+```
+
+4. **Fluent Bit Output Match 설정 확인**:
+   - `Match opensearch` → `Match kube.*` 또는 `Match *`로 변경 필요
+   - Input Tag와 Output Match가 일치해야 함
+
+5. **브라우저 캐시 삭제 후 재로그인**
+
+### 3.4 Dashboard 및 Visualization 생성 (선택사항)
+
+#### Dashboard 생성
+1. 좌측 메뉴에서 **Dashboard** 클릭
+2. **Create dashboard** 버튼 클릭
+3. **Add** 버튼으로 Visualization 추가
+4. 우측 상단 **Save** 버튼으로 저장
+   - Title: "DevPM Application Logs"
+   - Description: "ai-app-d-devpm 로그 모니터링"
+
+#### Visualization 생성 예시
+1. 좌측 메뉴에서 **Visualize** 클릭
+2. **Create visualization** 버튼 클릭
+3. Visualization 타입 선택:
+   - **Line chart**: 시간별 로그 추이
+   - **Pie chart**: 네임스페이스별 로그 분포
+   - **Data table**: 로그 상세 테이블
+   - **Metric**: 총 로그 카운트
+4. Index pattern 선택: `ai-app-d-devpm-*`
+5. 메트릭 및 버킷 설정
+6. **Save** 버튼으로 저장
 
 ## 4. 인덱스 확인
 
