@@ -1,7 +1,7 @@
-# OpenSearch 사용자 분리 및 권한 설정 가이드
+# OpenSearch 사용자 분리 및 권한 설정 가이드 (DevTools)
 
 ## 개요
-OpenSearch에서 인덱스 패턴별로 접근 권한을 분리하여 사용자를 생성하는 가이드입니다.
+OpenSearch DevTools를 사용하여 인덱스 패턴별로 접근 권한을 분리하여 사용자를 생성하는 가이드입니다.
 
 ### 사용자 및 권한 요구사항
 - **devpm 사용자**: `ai-app-d-devpm-*` 인덱스만 접근 가능
@@ -12,10 +12,6 @@ OpenSearch에서 인덱스 패턴별로 접근 권한을 분리하여 사용자�
 각 인덱스 패턴에 대한 Role을 먼저 생성합니다.
 
 ### 1.1 devpm Role 생성
-
-OpenSearch Dashboards → Security → Roles → Create role
-
-**Dev Tools에서 생성:**
 
 ```json
 PUT _plugins/_security/api/roles/devpm_role
@@ -142,7 +138,7 @@ PUT _plugins/_security/api/roles/prism_role
 ```json
 PUT _plugins/_security/api/internalusers/devpm
 {
-  "password": "DevPm@2026!",
+  "password": "Secc1111!!!!",
   "backend_roles": [],
   "attributes": {
     "description": "DevPM team user with access to ai-app-d-devpm-* indices"
@@ -155,7 +151,7 @@ PUT _plugins/_security/api/internalusers/devpm
 ```json
 PUT _plugins/_security/api/internalusers/prism
 {
-  "password": "Prism@2026!",
+  "password": "Secc1111!!!!",
   "backend_roles": [],
   "attributes": {
     "description": "Prism team user with access to ai-app-d-prism-* indices"
@@ -191,87 +187,9 @@ PUT _plugins/_security/api/rolesmapping/prism_role
 }
 ```
 
-## 4. OpenSearch Dashboards UI에서 생성하기
+## 4. 권한 확인
 
-### 4.1 Role 생성
-
-1. OpenSearch Dashboards 접속 (admin 계정)
-2. 좌측 메뉴 → **Security** → **Roles**
-3. **Create role** 클릭
-
-#### devpm_role 설정:
-
-**Role name**: `devpm_role`
-
-**Cluster permissions**:
-- `cluster_composite_ops_ro`
-
-**Index permissions**:
-- Index patterns: `ai-app-d-devpm-*`
-- Permissions:
-  - `read`
-  - `search`
-  - `get`
-  - `indices:data/read/*`
-  - `indices:admin/mappings/get`
-  - `indices:admin/mappings/fields/get`
-  - `indices:admin/get`
-  - `indices:admin/exists`
-  - `indices:monitor/stats`
-
-**추가 Index permissions** (Dashboard 사용을 위해):
-- Index patterns: `.kibana*`, `.opensearch_dashboards*`
-- Permissions:
-  - `read`
-  - `write`
-  - `delete`
-  - `indices:data/read/*`
-  - `indices:data/write/*`
-  - `indices:admin/create`
-  - `indices:admin/exists`
-  - `indices:admin/mapping/put`
-
-**Tenant permissions**:
-- Tenant pattern: `global_tenant`
-- Permissions: `kibana_all_write`
-
-4. **Create** 클릭
-
-#### prism_role 설정:
-
-동일한 방법으로 `prism_role` 생성하되, Index patterns를 `ai-app-d-prism-*`로 설정
-
-### 4.2 Internal User 생성
-
-1. 좌측 메뉴 → **Security** → **Internal Users**
-2. **Create internal user** 클릭
-
-#### devpm 사용자:
-- Username: `devpm`
-- Password: `DevPm@2026!`
-- Confirm password: `DevPm@2026!`
-- Backend roles: (비워둠)
-- Attributes: `description: DevPM team user`
-
-3. **Create** 클릭
-
-#### prism 사용자:
-동일한 방법으로 `prism` 사용자 생성
-
-### 4.3 Role Mapping
-
-1. 좌측 메뉴 → **Security** → **Roles**
-2. `devpm_role` 클릭
-3. **Mapped users** 탭 선택
-4. **Map users** 클릭
-5. Users 필드에 `devpm` 입력
-6. **Map** 클릭
-
-동일한 방법으로 `prism_role`에 `prism` 사용자 매핑
-
-## 5. 권한 확인
-
-### 5.1 devpm 사용자로 로그인 테스트
+### 4.1 devpm 사용자로 로그인 테스트
 
 ```bash
 # devpm 사용자로 인덱스 조회
@@ -289,7 +207,7 @@ curl -u devpm:DevPm@2026! \
 # 접근 거부 (403 Forbidden)
 ```
 
-### 5.2 prism 사용자로 로그인 테스트
+### 4.2 prism 사용자로 로그인 테스트
 
 ```bash
 # prism 사용자로 인덱스 조회
@@ -307,27 +225,41 @@ curl -u prism:Prism@2026! \
 # 접근 거부 (403 Forbidden)
 ```
 
-## 6. Index Pattern 생성 (각 사용자별)
+## 5. Index Pattern 생성 (DevTools)
 
-### 6.1 devpm 사용자로 로그인
+### 5.1 devpm 인덱스 패턴 생성
 
-1. OpenSearch Dashboards에 `devpm` 계정으로 로그인
-2. **Management** → **Index Patterns** → **Create index pattern**
-3. Index pattern: `ai-app-d-devpm-*`
-4. Time field: `@timestamp`
-5. **Create index pattern**
+DevTools에서 실행 (devpm 사용자로 로그인 후):
 
-### 6.2 prism 사용자로 로그인
+```json
+POST .kibana/_doc/index-pattern:ai-app-d-devpm-*
+{
+  "type": "index-pattern",
+  "index-pattern": {
+    "title": "ai-app-d-devpm-*",
+    "timeFieldName": "@timestamp"
+  }
+}
+```
 
-1. OpenSearch Dashboards에 `prism` 계정으로 로그인
-2. **Management** → **Index Patterns** → **Create index pattern**
-3. Index pattern: `ai-app-d-prism-*`
-4. Time field: `@timestamp`
-5. **Create index pattern**
+### 5.2 prism 인덱스 패턴 생성
 
-## 7. 추가 권한 설정 (선택사항)
+DevTools에서 실행 (prism 사용자로 로그인 후):
 
-### 7.1 Dashboard 생성 권한 추가
+```json
+POST .kibana/_doc/index-pattern:ai-app-d-prism-*
+{
+  "type": "index-pattern",
+  "index-pattern": {
+    "title": "ai-app-d-prism-*",
+    "timeFieldName": "@timestamp"
+  }
+}
+```
+
+## 6. 추가 권한 설정 (선택사항)
+
+### 6.1 Dashboard 생성 권한 추가
 
 사용자가 자신의 Dashboard를 생성하고 저장할 수 있도록 하려면:
 
@@ -377,7 +309,7 @@ PUT _plugins/_security/api/roles/devpm_role
 }
 ```
 
-### 7.2 Private Tenant 사용
+### 6.2 Private Tenant 사용
 
 각 사용자가 독립적인 작업 공간을 가지도록 설정:
 
@@ -394,7 +326,7 @@ PUT _plugins/_security/api/roles/devpm_role
 ]
 ```
 
-## 8. 비밀번호 변경
+## 7. 비밀번호 변경
 
 ### 사용자 스스로 비밀번호 변경
 
@@ -417,7 +349,7 @@ PUT _plugins/_security/api/internalusers/devpm
 }
 ```
 
-## 9. 트러블슈팅
+## 8. 트러블슈팅
 
 ### 권한 오류 발생 시
 
@@ -448,7 +380,7 @@ GET _plugins/_security/api/internalusers/devpm
 - allowed_actions에 필요한 권한이 모두 포함되어 있는지 확인
 - Role Mapping이 올바르게 설정되었는지 확인
 
-## 10. 보안 권장사항
+## 9. 보안 권장사항
 
 1. **강력한 비밀번호 사용**
    - 최소 12자 이상
