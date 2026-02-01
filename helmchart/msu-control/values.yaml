@@ -42,6 +42,16 @@ securityContext: {}
 service:
   type: ClusterIP
   port: 80
+  # Cross-Zone 트래픽 비용 절감을 위한 설정
+  # Topology Aware Hints: 같은 존 내에서 트래픽 우선 라우팅
+  topologyAwareHints:
+    enabled: true  # false로 설정하면 비활성화
+  annotations: {}
+    # 추가 annotations가 필요한 경우 여기에 추가
+    # example.com/custom-annotation: "value"
+  # 같은 노드 내에서만 트래픽 라우팅 (선택)
+  # topologyAwareHints보다 더 강력한 제약
+  internalTrafficPolicy: ""  # "Local" 또는 "Cluster" (기본값, 비워두면 적용 안 됨)
 
 ingress:
   enabled: false
@@ -120,7 +130,7 @@ topologySpreadConstraints:
 
 # Persistent Volume Claim
 persistence:
-  enabled: true
+  enabled: false
   storageClass: "gp2"
   accessMode: ReadWriteOnce
   size: 10Gi

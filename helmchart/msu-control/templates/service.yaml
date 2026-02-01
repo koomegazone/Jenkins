@@ -4,8 +4,18 @@ metadata:
   name: {{ include "msu-control.fullname" . }}
   labels:
     {{- include "msu-control.labels" . | nindent 4 }}
+  annotations:
+    {{- if .Values.service.topologyAwareHints.enabled }}
+    service.kubernetes.io/topology-mode: "Auto"
+    {{- end }}
+    {{- with .Values.service.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
 spec:
   type: {{ .Values.service.type }}
+  {{- if .Values.service.internalTrafficPolicy }}
+  internalTrafficPolicy: {{ .Values.service.internalTrafficPolicy }}
+  {{- end }}
   ports:
     - port: {{ .Values.service.port }}
       targetPort: http

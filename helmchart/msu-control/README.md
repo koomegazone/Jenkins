@@ -103,6 +103,13 @@ The following table lists the configurable parameters of the msu-control chart a
 | `image.tag` | Image tag | `""` (uses appVersion) |
 | `service.type` | Service type | `ClusterIP` |
 | `service.port` | Service port | `80` |
+| `service.topologyAwareHints.enabled` | Enable topology aware hints | `true` |
+| `service.annotations` | Service annotations | `{}` |
+| `service.internalTrafficPolicy` | Internal traffic policy | `""` |
+| `topologySpreadConstraints.enabled` | Enable topology spread | `true` |
+| `topologySpreadConstraints.maxSkew` | Max skew between zones | `1` |
+| `topologySpreadConstraints.topologyKey` | Topology key | `topology.kubernetes.io/zone` |
+| `topologySpreadConstraints.whenUnsatisfiable` | When unsatisfiable | `DoNotSchedule` |
 | `autoscaling.enabled` | Enable HPA | `true` |
 | `autoscaling.minReplicas` | Minimum replicas | `3` |
 | `autoscaling.maxReplicas` | Maximum replicas | `3` |
@@ -158,6 +165,46 @@ affinity:
           - ap-northeast-2a
           - ap-northeast-2c
 ```
+
+### Reduce Cross-Zone Network Costs
+
+**중요**: TopologySpreadConstraints만으로는 Cross-Zone 통신 비용이 절감되지 않습니다!
+
+트래픽을 같은 존 내에서 라우팅하려면 **Topology Aware Hints**를 함께 사용하세요 (기본 활성화):
+
+```bash
+# 기본 설치 (Topology Aware Hints 자동 활성화)
+helm install msu-control . \
+  --set topologySpreadConstraints.enabled=true \
+  --set autoscaling.minReplicas=4
+
+# Topology Aware Hints 비활성화하려면
+helm install msu-control . \
+  --set service.topologyAwareHints.enabled=false
+```
+
+또는 같은 노드 내에서만 트래픽 라우팅 (더 강력한 제약):
+
+```bash
+helm install msu-control . \
+  --set topologySpreadConstraints.enabled=true \
+  --set service.internalTrafficPolicy="Local"
+```
+
+**검증 방법**:
+
+```bash
+# 1. Service annotation 확인
+kubectl describe svc msu-control | grep topology-mode
+
+# 2. EndpointSlice hints 확인
+kubectl get endpointslices -l kubernetes.io/service-name=msu-control -o yaml | grep -A 3 hints
+
+# 3. iptables 룰 확인 (각 존의 노드에서 다른 룰이 생성됨)
+sudo iptables-save | grep KUBE-SVC
+```
+
+자세한 내용은 [CROSS-ZONE-COST-OPTIMIZATION.md](./CROSS-ZONE-COST-OPTIMIZATION.md)와 [KUBE-PROXY-IPTABLES-ANALYSIS.md](./KUBE-PROXY-IPTABLES-ANALYSIS.md)를 참고하세요.
 
 ### Enable Ingress
 
