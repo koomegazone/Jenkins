@@ -108,7 +108,7 @@ affinity:
 # Persistent Volume Claim
 persistence:
   enabled: true
-  # storageClass: "gp3"
+  storageClass: "gp2"
   accessMode: ReadWriteOnce
   size: 10Gi
   # annotations: {}
