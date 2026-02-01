@@ -87,6 +87,19 @@ spec:
                       - msu-control
               topologyKey: kubernetes.io/hostname
       {{- end }}
+      {{- if .Values.topologySpreadConstraints.enabled }}
+      topologySpreadConstraints:
+        - maxSkew: {{ .Values.topologySpreadConstraints.maxSkew }}
+          topologyKey: {{ .Values.topologySpreadConstraints.topologyKey }}
+          whenUnsatisfiable: {{ .Values.topologySpreadConstraints.whenUnsatisfiable }}
+          labelSelector:
+            matchLabels:
+              {{- include "msu-control.selectorLabels" . | nindent 14 }}
+          {{- if .Values.topologySpreadConstraints.allowedZones }}
+          nodeAffinityPolicy: Honor
+          nodeTaintsPolicy: Honor
+          {{- end }}
+      {{- end }}
       {{- with .Values.tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}

@@ -123,6 +123,42 @@ The following table lists the configurable parameters of the msu-control chart a
 
 ## Examples
 
+### Deploy Pods Only in A and C Zones (Zone Distribution)
+
+```bash
+# topologySpreadConstraints를 사용하여 A, C존에 파드 분산 배포
+helm install msu-control . \
+  --set topologySpreadConstraints.enabled=true \
+  --set topologySpreadConstraints.maxSkew=1 \
+  --set topologySpreadConstraints.whenUnsatisfiable=DoNotSchedule \
+  --set-string nodeSelector."topology\.kubernetes\.io/zone"="ap-northeast-2a\,ap-northeast-2c"
+```
+
+또는 values.yaml 파일을 수정:
+
+```yaml
+topologySpreadConstraints:
+  enabled: true
+  maxSkew: 1
+  topologyKey: topology.kubernetes.io/zone
+  whenUnsatisfiable: DoNotSchedule
+
+# A, C존의 노드에만 스케줄링하려면 nodeAffinity 사용
+nodeSelector: {}
+
+# 또는 affinity를 직접 설정 (더 유연함)
+affinity:
+  nodeAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: topology.kubernetes.io/zone
+          operator: In
+          values:
+          - ap-northeast-2a
+          - ap-northeast-2c
+```
+
 ### Enable Ingress
 
 ```bash
