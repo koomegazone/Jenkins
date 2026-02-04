@@ -37,8 +37,9 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           env:
             - name: POD_NAME
-              fieledRef:
-                fieldPath: metadata.name 
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name 
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - name: http
@@ -75,30 +76,13 @@ spec:
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- if .Values.affinity.podAntiAffinity.enabled }}
+      {{- with .Values.affinity }}
       affinity:
-        podAntiAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            - labelSelector:
-                matchExpressions:
-                  - key: app.kubernetes.io/name
-                    operator: In
-                    values:
-                      - msu-control
-              topologyKey: kubernetes.io/hostname
+        {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- if .Values.topologySpreadConstraints.enabled }}
+      {{- with .Values.topologySpreadConstraints }}
       topologySpreadConstraints:
-        - maxSkew: {{ .Values.topologySpreadConstraints.maxSkew }}
-          topologyKey: {{ .Values.topologySpreadConstraints.topologyKey }}
-          whenUnsatisfiable: {{ .Values.topologySpreadConstraints.whenUnsatisfiable }}
-          labelSelector:
-            matchLabels:
-              {{- include "msu-control.selectorLabels" . | nindent 14 }}
-          {{- if .Values.topologySpreadConstraints.allowedZones }}
-          nodeAffinityPolicy: Honor
-          nodeTaintsPolicy: Honor
-          {{- end }}
+        {{- toYaml . | nindent 8 }}
       {{- end }}
       {{- with .Values.tolerations }}
       tolerations:

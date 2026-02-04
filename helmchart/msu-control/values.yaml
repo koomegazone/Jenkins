@@ -113,20 +113,31 @@ nodeSelector: {}
 
 tolerations: []
 
-affinity:
-  podAntiAffinity:
-    enabled: false
 
 # Topology Spread Constraints - 파드를 특정 존에 분산 배포
 topologySpreadConstraints:
-  enabled: false
-  maxSkew: 1
-  topologyKey: topology.kubernetes.io/zone
-  whenUnsatisfiable: DoNotSchedule
-  # A, C존에만 배포하려면 nodeSelector와 함께 사용
-  allowedZones:
-    - ap-northeast-2a
-    - ap-northeast-2c
+  - maxSkew: 1
+    topologyKey: topology.kubernetes.io/zone
+    whenUnsatisfiable: DoNotSchedule
+    labelSelector:
+      matchLabels:
+        app.kubernetes.io/name: msu-control
+        app.kubernetes.io/instance: RELEASE-NAME
+
+
+affinity:
+  nodeAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: topology.kubernetes.io/zone
+          operator: In
+          values:
+          - ap-northeast-2a
+          - ap-northeast-2c
+
+
+
 
 # Persistent Volume Claim
 persistence:
