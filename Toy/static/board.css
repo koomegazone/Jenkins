@@ -1,0 +1,434 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Malgun Gothic', sans-serif;
+    background-color: #f5f6f8;
+    color: #333;
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 40px auto;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    padding: 30px;
+}
+
+.board-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #333;
+}
+
+.board-header h1 {
+    font-size: 28px;
+    font-weight: 700;
+    color: #333;
+}
+
+.btn-write {
+    background-color: #4a90e2;
+    color: #fff;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    transition: background-color 0.3s;
+}
+
+.btn-write:hover {
+    background-color: #357abd;
+}
+
+.search-bar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.search-type {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.search-input {
+    flex: 1;
+    padding: 10px 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: #4a90e2;
+}
+
+.btn-search {
+    background-color: #333;
+    color: #fff;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.btn-search:hover {
+    background-color: #555;
+}
+
+.board-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 30px;
+}
+
+.board-table thead {
+    background-color: #f8f9fa;
+    border-top: 2px solid #333;
+    border-bottom: 1px solid #ddd;
+}
+
+.board-table th {
+    padding: 15px 10px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+    text-align: center;
+}
+
+.board-table td {
+    padding: 15px 10px;
+    font-size: 14px;
+    color: #666;
+    text-align: center;
+    border-bottom: 1px solid #eee;
+}
+
+.board-table tbody tr {
+    transition: background-color 0.2s;
+}
+
+.board-table tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+.board-table tbody tr.notice {
+    background-color: #fffbf0;
+}
+
+.col-num {
+    width: 80px;
+}
+
+.col-title {
+    width: auto;
+}
+
+.col-author {
+    width: 120px;
+}
+
+.col-date {
+    width: 120px;
+}
+
+.col-views {
+    width: 80px;
+}
+
+.title {
+    text-align: left !important;
+    padding-left: 20px !important;
+}
+
+.title a {
+    color: #333;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.title a:hover {
+    color: #4a90e2;
+    text-decoration: underline;
+}
+
+.badge-notice {
+    display: inline-block;
+    background-color: #ff6b6b;
+    color: #fff;
+    padding: 4px 10px;
+    border-radius: 3px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.comment-count {
+    color: #4a90e2;
+    font-weight: 600;
+    margin-left: 5px;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    gap: 5px;
+    margin-top: 30px;
+}
+
+.page-btn {
+    display: inline-block;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    color: #666;
+    text-decoration: none;
+    font-size: 14px;
+    transition: all 0.3s;
+}
+
+.page-btn:hover {
+    background-color: #f8f9fa;
+    border-color: #4a90e2;
+    color: #4a90e2;
+}
+
+.page-btn.active {
+    background-color: #4a90e2;
+    border-color: #4a90e2;
+    color: #fff;
+    font-weight: 600;
+}
+
+/* 글쓰기 폼 */
+.write-form {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #333;
+}
+
+.form-group input[type="text"],
+.form-group textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    font-family: inherit;
+}
+
+.form-group input[type="text"]:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #4a90e2;
+}
+
+.checkbox-group label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: normal;
+}
+
+.form-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 30px;
+}
+
+.btn-submit {
+    background-color: #4a90e2;
+    color: #fff;
+    border: none;
+    padding: 12px 32px;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.btn-submit:hover {
+    background-color: #357abd;
+}
+
+.btn-cancel {
+    background-color: #999;
+    color: #fff;
+    border: none;
+    padding: 12px 32px;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-block;
+    transition: background-color 0.3s;
+}
+
+.btn-cancel:hover {
+    background-color: #777;
+}
+
+/* 게시글 보기 */
+.post-view {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-bottom: 30px;
+}
+
+.post-header {
+    padding: 20px;
+    border-bottom: 1px solid #ddd;
+    background-color: #f8f9fa;
+}
+
+.post-title {
+    font-size: 24px;
+    margin-bottom: 15px;
+    color: #333;
+}
+
+.post-info {
+    display: flex;
+    gap: 20px;
+    font-size: 14px;
+    color: #666;
+}
+
+.post-content {
+    padding: 30px 20px;
+    min-height: 300px;
+    line-height: 1.8;
+    font-size: 15px;
+}
+
+/* 댓글 */
+.comments-section {
+    margin-top: 40px;
+}
+
+.comments-section h3 {
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #333;
+}
+
+.comment-form {
+    background-color: #f8f9fa;
+    padding: 20px;
+    border-radius: 4px;
+    margin-bottom: 30px;
+}
+
+.comment-form input[type="text"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-bottom: 10px;
+}
+
+.comment-form textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-bottom: 10px;
+    font-family: inherit;
+}
+
+.comments-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.comment-item {
+    padding: 15px;
+    border: 1px solid #eee;
+    border-radius: 4px;
+    background-color: #fafafa;
+}
+
+.comment-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    font-size: 14px;
+}
+
+.comment-date {
+    color: #999;
+    font-size: 12px;
+}
+
+.comment-content {
+    color: #333;
+    line-height: 1.6;
+}
+
+@media (max-width: 768px) {
+    .container {
+        margin: 20px;
+        padding: 20px;
+    }
+
+    .board-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+    .search-bar {
+        flex-direction: column;
+    }
+
+    .board-table {
+        font-size: 12px;
+    }
+
+    .col-author,
+    .col-date,
+    .col-views {
+        display: none;
+    }
+
+    .title {
+        padding-left: 10px !important;
+    }
+
+    .post-info {
+        flex-direction: column;
+        gap: 5px;
+    }
+}
