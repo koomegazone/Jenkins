@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>책 수정 - 도서 대여 관리</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='library.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header class="library-header">
+            <h1>📚 책 정보 수정</h1>
+            <a href="/" class="btn-back">← 목록으로</a>
+        </header>
+
+        <div class="form-container">
+            <form action="/edit/{{ book.id }}" method="post" class="book-form">
+                <div class="form-group">
+                    <label for="title">책 제목 *</label>
+                    <input type="text" id="title" name="title" value="{{ book.title }}" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="author">저자 *</label>
+                    <input type="text" id="author" name="author" value="{{ book.author }}" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="image_url">책 이미지 URL</label>
+                    <input type="url" id="image_url" name="image_url" value="{{ book.image_url }}">
+                </div>
+
+                <div class="image-preview" id="imagePreview">
+                    <p>현재 이미지</p>
+                    <img id="previewImg" src="{{ book.image_url }}" alt="미리보기" onerror="this.style.display='none'">
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn-submit">수정하기</button>
+                    <a href="/" class="btn-cancel">취소</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('image_url').addEventListener('input', function(e) {
+            const url = e.target.value;
+            const preview = document.getElementById('previewImg');
+            
+            if (url) {
+                preview.src = url;
+                preview.style.display = 'block';
+                preview.onerror = function() {
+                    this.style.display = 'none';
+                };
+            } else {
+                preview.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
