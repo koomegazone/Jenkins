@@ -4,90 +4,124 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>도서 대여 관리 시스템</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='library.css') }}">
 </head>
 <body>
-    <div class="container">
-        <header class="library-header">
-            <h1>📚 도서 대여 관리 시스템</h1>
-            <a href="/add" class="btn-add">+ 책 추가</a>
+    <div class="container py-4">
+        <header class="library-header bg-white rounded-3 shadow-sm p-4 mb-4 d-flex justify-content-between align-items-center">
+            <h1 class="mb-0"><i class="bi bi-book-fill text-primary"></i> 도서 대여 관리 시스템</h1>
+            <a href="/add" class="btn btn-primary btn-lg"><i class="bi bi-plus-circle"></i> 책 추가</a>
         </header>
 
-        <div class="stats-bar">
-            <div class="stat-card available">
-                <div class="stat-number">{{ available_count }}</div>
-                <div class="stat-label">대여 가능</div>
+        <div class="row g-3 mb-4">
+            <div class="col-md-4">
+                <div class="card border-success shadow-sm">
+                    <div class="card-body text-center">
+                        <h2 class="display-4 text-success mb-2">{{ available_count }}</h2>
+                        <p class="card-text text-muted fw-bold"><i class="bi bi-check-circle"></i> 대여 가능</p>
+                    </div>
+                </div>
             </div>
-            <div class="stat-card borrowed">
-                <div class="stat-number">{{ borrowed_count }}</div>
-                <div class="stat-label">대여 중</div>
+            <div class="col-md-4">
+                <div class="card border-warning shadow-sm">
+                    <div class="card-body text-center">
+                        <h2 class="display-4 text-warning mb-2">{{ borrowed_count }}</h2>
+                        <p class="card-text text-muted fw-bold"><i class="bi bi-clock"></i> 대여 중</p>
+                    </div>
+                </div>
             </div>
-            <div class="stat-card total">
-                <div class="stat-number">{{ available_count + borrowed_count }}</div>
-                <div class="stat-label">전체 도서</div>
+            <div class="col-md-4">
+                <div class="card border-primary shadow-sm">
+                    <div class="card-body text-center">
+                        <h2 class="display-4 text-primary mb-2">{{ available_count + borrowed_count }}</h2>
+                        <p class="card-text text-muted fw-bold"><i class="bi bi-book"></i> 전체 도서</p>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div class="filter-bar">
-            <form action="/" method="get" class="filter-form">
-                <div class="filter-buttons">
-                    <a href="/?status=all" class="filter-btn {% if status_filter == 'all' %}active{% endif %}">전체</a>
-                    <a href="/?status=available" class="filter-btn {% if status_filter == 'available' %}active{% endif %}">대여 가능</a>
-                    <a href="/?status=borrowed" class="filter-btn {% if status_filter == 'borrowed' %}active{% endif %}">대여 중</a>
-                </div>
-                <div class="search-box">
-                    <input type="text" name="search" placeholder="책 제목 또는 저자 검색" value="{{ search }}" class="search-input">
-                    <button type="submit" class="btn-search">검색</button>
-                </div>
-            </form>
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <form action="/" method="get" class="row g-3 align-items-center">
+                    <div class="col-auto">
+                        <div class="btn-group" role="group">
+                            <a href="/?status=all" class="btn btn-outline-primary {% if status_filter == 'all' %}active{% endif %}">전체</a>
+                            <a href="/?status=available" class="btn btn-outline-success {% if status_filter == 'available' %}active{% endif %}">대여 가능</a>
+                            <a href="/?status=borrowed" class="btn btn-outline-warning {% if status_filter == 'borrowed' %}active{% endif %}">대여 중</a>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="input-group">
+                            <input type="text" name="search" class="form-control" placeholder="책 제목 또는 저자 검색" value="{{ search }}">
+                            <button type="submit" class="btn btn-dark"><i class="bi bi-search"></i> 검색</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
         </div>
 
-        <div class="books-grid">
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5 g-3">
             {% for book in books %}
-            <div class="book-card {% if book.status == 'borrowed' %}borrowed{% endif %}">
-                <div class="book-image">
-                    <img src="{{ book.image_url }}" alt="{{ book.title }}" onerror="this.src='https://via.placeholder.com/200x280?text=No+Image'">
-                    <div class="status-badge {% if book.status == 'available' %}available{% else %}borrowed{% endif %}">
-                        {% if book.status == 'available' %}
-                        ✓ 대여 가능
-                        {% else %}
-                        ✗ 대여 중
-                        {% endif %}
+            <div class="col">
+                <div class="card h-100 shadow-sm {% if book.status == 'borrowed' %}opacity-75{% endif %}">
+                    <div class="position-relative">
+                        <img src="{{ book.image_url }}" class="card-img-top" alt="{{ book.title }}" style="height: 220px; object-fit: cover;" onerror="this.src='https://via.placeholder.com/200x280?text=No+Image'">
+                        <span class="position-absolute top-0 end-0 m-2 badge {% if book.status == 'available' %}bg-success{% else %}bg-warning{% endif %}">
+                            {% if book.status == 'available' %}
+                            <i class="bi bi-check-circle"></i> 대여 가능
+                            {% else %}
+                            <i class="bi bi-clock"></i> 대여 중
+                            {% endif %}
+                        </span>
                     </div>
-                </div>
-                <div class="book-info">
-                    <h3 class="book-title">{{ book.title }}</h3>
-                    <p class="book-author">{{ book.author }}</p>
-                    
-                    {% if book.status == 'borrowed' %}
-                    <div class="borrow-info">
-                        <div class="info-row">
-                            <span class="info-label">대여자:</span>
-                            <span class="info-value">{{ book.borrower }}</span>
+                    <div class="card-body">
+                        <h6 class="card-title fw-bold text-truncate" title="{{ book.title }}">{{ book.title }}</h6>
+                        <p class="card-text text-muted small mb-2">{{ book.author }}</p>
+                        
+                        {% if book.status == 'borrowed' %}
+                        <div class="alert alert-warning py-2 px-2 mb-2" style="font-size: 0.75rem;">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span class="fw-bold">대여자:</span>
+                                <span>{{ book.borrower }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-1">
+                                <span class="fw-bold">대여일:</span>
+                                <span>{{ book.borrow_date }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span class="fw-bold">반납일:</span>
+                                <span class="text-danger">{{ book.return_date }}</span>
+                            </div>
                         </div>
-                        <div class="info-row">
-                            <span class="info-label">대여일:</span>
-                            <span class="info-value">{{ book.borrow_date }}</span>
-                        </div>
-                        <div class="info-row">
-                            <span class="info-label">반납 예정일:</span>
-                            <span class="info-value return-date">{{ book.return_date }}</span>
-                        </div>
-                    </div>
-                    {% endif %}
-                    
-                    <div class="book-actions">
-                        {% if book.status == 'available' %}
-                        <button onclick="showBorrowModal({{ book.id }}, '{{ book.title }}')" class="btn-borrow">대여하기</button>
-                        {% else %}
-                        <form action="/return/{{ book.id }}" method="post" style="display: inline;">
-                            <button type="submit" class="btn-return">반납하기</button>
-                        </form>
                         {% endif %}
-                        <a href="/edit/{{ book.id }}" class="btn-edit">수정</a>
-                        <form action="/delete/{{ book.id }}" method="post" style="display: inline;" onsubmit="return confirm('정말 삭제하시겠습니까?');">
-                            <button type="submit" class="btn-delete">삭제</button>
-                        </form>
+                        
+                        <div class="d-grid gap-1">
+                            {% if book.status == 'available' %}
+                            <button onclick="showBorrowModal({{ book.id }}, '{{ book.title }}')" class="btn btn-success btn-sm">
+                                <i class="bi bi-hand-thumbs-up"></i> 대여
+                            </button>
+                            {% else %}
+                            <form action="/return/{{ book.id }}" method="post">
+                                <button type="submit" class="btn btn-primary btn-sm w-100">
+                                    <i class="bi bi-arrow-return-left"></i> 반납
+                                </button>
+                            </form>
+                            {% endif %}
+                            <div class="btn-group btn-group-sm">
+                                <a href="/edit/{{ book.id }}" class="btn btn-outline-warning">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <form action="/delete/{{ book.id }}" method="post" class="d-inline" onsubmit="return confirm('정말 삭제하시겠습니까?');">
+                                    <button type="submit" class="btn btn-outline-danger">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -95,48 +129,47 @@
         </div>
 
         {% if books|length == 0 %}
-        <div class="empty-state">
-            <p>📖 등록된 책이 없습니다.</p>
-            <a href="/add" class="btn-add">첫 번째 책 추가하기</a>
+        <div class="text-center py-5">
+            <i class="bi bi-book display-1 text-muted"></i>
+            <p class="lead mt-3">📖 등록된 책이 없습니다.</p>
+            <a href="/add" class="btn btn-primary btn-lg"><i class="bi bi-plus-circle"></i> 첫 번째 책 추가하기</a>
         </div>
         {% endif %}
     </div>
 
     <!-- 대여 모달 -->
-    <div id="borrowModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeBorrowModal()">&times;</span>
-            <h2>책 대여하기</h2>
-            <p id="modalBookTitle" class="modal-book-title"></p>
-            <form id="borrowForm" method="post">
-                <div class="form-group">
-                    <label for="borrower">대여자 이름</label>
-                    <input type="text" id="borrower" name="borrower" required placeholder="이름을 입력하세요">
+    <div class="modal fade" id="borrowModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title"><i class="bi bi-book"></i> 책 대여하기</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-actions">
-                    <button type="submit" class="btn-submit">대여하기</button>
-                    <button type="button" onclick="closeBorrowModal()" class="btn-cancel">취소</button>
-                </div>
-            </form>
+                <form id="borrowForm" method="post">
+                    <div class="modal-body">
+                        <p id="modalBookTitle" class="fw-bold text-primary fs-5 mb-3"></p>
+                        <div class="mb-3">
+                            <label for="borrower" class="form-label">대여자 이름</label>
+                            <input type="text" class="form-control form-control-lg" id="borrower" name="borrower" required placeholder="이름을 입력하세요">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                        <button type="submit" class="btn btn-primary"><i class="bi bi-check-circle"></i> 대여하기</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 
+    <!-- Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         function showBorrowModal(bookId, bookTitle) {
-            document.getElementById('borrowModal').style.display = 'block';
             document.getElementById('modalBookTitle').textContent = bookTitle;
             document.getElementById('borrowForm').action = '/borrow/' + bookId;
-        }
-
-        function closeBorrowModal() {
-            document.getElementById('borrowModal').style.display = 'none';
-        }
-
-        window.onclick = function(event) {
-            const modal = document.getElementById('borrowModal');
-            if (event.target == modal) {
-                closeBorrowModal();
-            }
+            const modal = new bootstrap.Modal(document.getElementById('borrowModal'));
+            modal.show();
         }
     </script>
 </body>

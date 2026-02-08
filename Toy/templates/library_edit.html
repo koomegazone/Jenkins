@@ -4,44 +4,57 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>책 수정 - 도서 대여 관리</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='library.css') }}">
 </head>
 <body>
-    <div class="container">
-        <header class="library-header">
-            <h1>📚 책 정보 수정</h1>
-            <a href="/" class="btn-back">← 목록으로</a>
-        </header>
+    <div class="container py-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1><i class="bi bi-pencil-square text-primary"></i> 책 정보 수정</h1>
+            <a href="/" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> 목록으로</a>
+        </div>
 
-        <div class="form-container">
-            <form action="/edit/{{ book.id }}" method="post" class="book-form">
-                <div class="form-group">
-                    <label for="title">책 제목 *</label>
-                    <input type="text" id="title" name="title" value="{{ book.title }}" required>
-                </div>
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card shadow">
+                    <div class="card-body p-4">
+                        <form action="/edit/{{ book.id }}" method="post">
+                            <div class="mb-3">
+                                <label for="title" class="form-label fw-bold">책 제목 <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control form-control-lg" id="title" name="title" value="{{ book.title }}" required>
+                            </div>
 
-                <div class="form-group">
-                    <label for="author">저자 *</label>
-                    <input type="text" id="author" name="author" value="{{ book.author }}" required>
-                </div>
+                            <div class="mb-3">
+                                <label for="author" class="form-label fw-bold">저자 <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control form-control-lg" id="author" name="author" value="{{ book.author }}" required>
+                            </div>
 
-                <div class="form-group">
-                    <label for="image_url">책 이미지 URL</label>
-                    <input type="url" id="image_url" name="image_url" value="{{ book.image_url }}">
-                </div>
+                            <div class="mb-3">
+                                <label for="image_url" class="form-label fw-bold">책 이미지 URL</label>
+                                <input type="url" class="form-control" id="image_url" name="image_url" value="{{ book.image_url }}">
+                            </div>
 
-                <div class="image-preview" id="imagePreview">
-                    <p>현재 이미지</p>
-                    <img id="previewImg" src="{{ book.image_url }}" alt="미리보기" onerror="this.style.display='none'">
-                </div>
+                            <div class="text-center mb-3">
+                                <p class="text-muted">현재 이미지</p>
+                                <img id="previewImg" src="{{ book.image_url }}" alt="미리보기" class="img-thumbnail" style="max-width: 200px; max-height: 280px;" onerror="this.style.display='none'">
+                            </div>
 
-                <div class="form-actions">
-                    <button type="submit" class="btn-submit">수정하기</button>
-                    <a href="/" class="btn-cancel">취소</a>
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                                <button type="submit" class="btn btn-primary btn-lg px-5"><i class="bi bi-check-circle"></i> 수정하기</button>
+                                <a href="/" class="btn btn-secondary btn-lg px-5">취소</a>
+                            </div>
+                        </form>
+                    </div>
                 </div>
-            </form>
+            </div>
         </div>
     </div>
+
+    <!-- Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
         document.getElementById('image_url').addEventListener('input', function(e) {
