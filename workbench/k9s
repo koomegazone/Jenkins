@@ -1,5 +1,12 @@
-wget https://github.com/derailed/k9s/releases/download/v0.26.7/k9s_Linux_x86_64.tar.gz // 다운로드
-tar -zxvf ./k9s_Linux_x86_64.tar.gz // 압축 해제
-mkdir -p ~/.local/bin
-mv ./k9s ~/.local/bin && chmod +x ~/.local/bin/k9s // 바이너리 이동 및 실행권한 추가
-rm ./k9s_Linux_x86_64.tar.gz LICENSE README.md  // 불필요한 코드 제거
+# 최신 버전 다운로드
+curl -sL https://github.com/derailed/k9s/releases/latest/download/k9s_Linux_amd64.tar.gz | tar xz -C /tmp
+
+# 실행 파일 이동
+sudo mv /tmp/k9s /usr/local/bin/
+
+# 권한 설정
+sudo chmod +x /usr/local/bin/k9s
+
+# 확인
+k9s version
+
