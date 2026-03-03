@@ -49,20 +49,20 @@ echo "Policy 파일 내용:"
 cat fluent-bit-opensearch-policy.json
 echo ""
 
-POLICY_ARN=$(aws iam create-policy \
+if aws iam create-policy \
   --policy-name $POLICY_NAME \
   --policy-document file://fluent-bit-opensearch-policy.json \
-  --query 'Policy.Arn' \
-  --output text 2>&1)
-
-if [ $? -ne 0 ]; then
-  echo "Policy 생성 실패, 기존 Policy 확인 중..."
+  --output text > /dev/null 2>&1; then
+  echo "✅ Policy 생성 완료"
+  POLICY_ARN=$(aws iam list-policies --query "Policies[?PolicyName=='$POLICY_NAME'].Arn" --output text)
+else
+  echo "⚠️  Policy 생성 실패 (이미 존재할 수 있음), 기존 Policy 확인 중..."
   POLICY_ARN=$(aws iam list-policies --query "Policies[?PolicyName=='$POLICY_NAME'].Arn" --output text)
   if [ -z "$POLICY_ARN" ]; then
-    echo "Error: Policy를 생성하거나 찾을 수 없습니다."
-    echo "Error message: $POLICY_ARN"
+    echo "❌ Error: Policy를 생성하거나 찾을 수 없습니다."
     exit 1
   fi
+  echo "✅ 기존 Policy 발견"
 fi
 
 echo "Policy ARN: $POLICY_ARN"
