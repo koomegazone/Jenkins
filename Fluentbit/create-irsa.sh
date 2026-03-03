@@ -104,7 +104,7 @@ echo ""
 
 # 2. IAM Policy 생성
 echo "2. IAM Policy 생성 중..."
-cat > fluent-bit-opensearch-policy.json <<'EOF'
+cat > fluent-bit-opensearch-policy.json <<EOF
 {
   "Version": "2012-10-17",
   "Statement": [
@@ -116,17 +116,12 @@ cat > fluent-bit-opensearch-policy.json <<'EOF'
         "es:ESHttpGet"
       ],
       "Resource": [
-        "arn:aws:es:REGION:ACCOUNT_ID:domain/*"
+        "arn:aws:es:${REGION}:${ACCOUNT_ID}:domain/*"
       ]
     }
   ]
 }
 EOF
-
-# 변수 치환
-sed -i.bak "s/REGION/${REGION}/g" fluent-bit-opensearch-policy.json
-sed -i.bak "s/ACCOUNT_ID/${ACCOUNT_ID}/g" fluent-bit-opensearch-policy.json
-rm -f fluent-bit-opensearch-policy.json.bak
 
 echo "Policy 파일 내용:"
 cat fluent-bit-opensearch-policy.json
