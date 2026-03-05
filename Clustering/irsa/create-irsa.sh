@@ -110,9 +110,7 @@ EOF
 
   # 4-2. IAM Role 생성
   echo "  IAM Role 생성..."
-  ROLE_EXISTS=$(aws iam get-role --role-name $ROLE_NAME --profile $PROFILE 2>/dev/null || echo "")
-
-  if [ -z "$ROLE_EXISTS" ]; then
+  if ! aws iam get-role --role-name $ROLE_NAME --profile $PROFILE > /dev/null 2>&1; then
     aws iam create-role --profile $PROFILE \
       --role-name $ROLE_NAME \
       --assume-role-policy-document file:///tmp/trust-policy-${ROLE_NAME}.json \
