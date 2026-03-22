@@ -5,6 +5,8 @@ kubectl get crd
 helm repo add eks https://aws.github.io/eks-charts
 helm repo update
 helm install aws-load-balancer-controller eks/aws-load-balancer-controller -n kube-system --set clusterName=$CLUSTER_NAME
+
+
 ## 설치 확인
 kubectl get crd
 kubectl explain ingressclassparams.elbv2.k8s.aws
@@ -18,3 +20,6 @@ kubectl describe deploy -n kube-system aws-load-balancer-controller | grep 'Serv
 # 클러스터롤, 롤 확인
 kubectl describe clusterrolebindings.rbac.authorization.k8s.io aws-load-balancer-controller-rolebinding
 kubectl describe clusterroles.rbac.authorization.k8s.io aws-load-balancer-controller-role
+
+
+helm uninstall aws-load-balancer-controller -n kube-system       

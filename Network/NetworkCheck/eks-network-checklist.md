@@ -1,5 +1,6 @@
 # EKS 네트워크 통신 검증 체크리스트
-
+NODE1=52.79.163.172
+NODE2=15.164.215.244
 ## 검증 체크리스트
 
 | # | 규칙 | 검증 명령어 | 성공 시 | 실패 시 |
@@ -22,7 +23,7 @@ kubectl get nodes
 
 ### 2. Cluster → Node (10250)
 ```bash
-kubectl run test-pod --image=nginx
+kubectl run test-pod123 --image=nginx
 kubectl exec -it test-pod -- sh
 kubectl logs test-pod
 kubectl top nodes
