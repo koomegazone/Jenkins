@@ -269,47 +269,53 @@ create_node_role $ROLE_NODE_BACK_MGMT
 
 echo ""
 echo "=========================================="
-echo "  2. 보안그룹 생성"
+echo "  2. 보안그룹 확인"
 echo "=========================================="
 echo ""
 
-# 보안그룹 생성 함수
-create_security_group() {
+# 보안그룹 조회 함수 (존재하면 ID 반환, 없으면 스킵)
+get_security_group() {
     local sg_name=$1
-    local description=$2
     
-    echo -e "${YELLOW}보안그룹 생성: $sg_name${NC}"
-    
-    # 이미 존재하는지 확인
     existing_sg=$(aws ec2 describe-security-groups \
         --filters "Name=group-name,Values=$sg_name" "Name=vpc-id,Values=$VPC_ID" \
         --query 'SecurityGroups[0].GroupId' --output text 2>/dev/null)
     
     if [ "$existing_sg" != "None" ] && [ ! -z "$existing_sg" ]; then
-        echo -e "${YELLOW}  ⚠ 이미 존재합니다: $existing_sg${NC}"
+        echo -e "${GREEN}  ✓ $sg_name 존재 확인: $existing_sg${NC}" >&2
         echo $existing_sg
     else
-        sg_id=$(aws ec2 create-security-group \
-            --group-name $sg_name \
-            --description "$description" \
-            --vpc-id $VPC_ID \
-            --tag-specifications "ResourceType=security-group,Tags=[{Key=Name,Value=$sg_name},{Key=Service,Value=$SERVICE_NAME},{Key=Environment,Value=$ENV}]" \
-            --query 'GroupId' --output text)
-        
-        echo -e "${GREEN}  ✓ 생성 완료: $sg_id${NC}"
-        echo $sg_id
+        echo -e "${YELLOW}  ⚠ $sg_name 이 존재하지 않습니다. 스킵합니다.${NC}" >&2
+        echo ""
     fi
 }
 
-# 클러스터 보안그룹 생성
-SG_CLUSTER_FRONT_ID=$(create_security_group $SG_CLUSTER_FRONT "EKS Cluster Security Group - Front")
-SG_CLUSTER_BACK_ID=$(create_security_group $SG_CLUSTER_BACK "EKS Cluster Security Group - Back")
+# 클러스터 보안그룹 조회
+SG_CLUSTER_FRONT_ID=$(get_security_group $SG_CLUSTER_FRONT)
+SG_CLUSTER_BACK_ID=$(get_security_group $SG_CLUSTER_BACK)
 
-# 노드 보안그룹 생성
-SG_NODE_FRONT_APP_ID=$(create_security_group $SG_NODE_FRONT_APP "EKS Node Security Group - Front App")
-SG_NODE_BACK_APP_ID=$(create_security_group $SG_NODE_BACK_APP "EKS Node Security Group - Back App")
-SG_NODE_FRONT_MGMT_ID=$(create_security_group $SG_NODE_FRONT_MGMT "EKS Node Security Group - Front Mgmt")
-SG_NODE_BACK_MGMT_ID=$(create_security_group $SG_NODE_BACK_MGMT "EKS Node Security Group - Back Mgmt")
+# 노드 보안그룹 조회
+SG_NODE_FRONT_APP_ID=$(get_security_group $SG_NODE_FRONT_APP)
+SG_NODE_BACK_APP_ID=$(get_security_group $SG_NODE_BACK_APP)
+SG_NODE_FRONT_MGMT_ID=$(get_security_group $SG_NODE_FRONT_MGMT)
+SG_NODE_BACK_MGMT_ID=$(get_security_group $SG_NODE_BACK_MGMT)
+
+# 보안그룹이 하나라도 없으면 규칙 설정 스킵
+MISSING_SG=false
+for sg_var in "$SG_CLUSTER_FRONT_ID" "$SG_CLUSTER_BACK_ID" "$SG_NODE_FRONT_APP_ID" "$SG_NODE_BACK_APP_ID" "$SG_NODE_FRONT_MGMT_ID" "$SG_NODE_BACK_MGMT_ID"; do
+    if [ -z "$sg_var" ]; then
+        MISSING_SG=true
+        break
+    fi
+done
+
+if [ "$MISSING_SG" = true ]; then
+    echo ""
+    echo -e "${RED}✗ 일부 보안그룹이 존재하지 않아 규칙 설정을 스킵합니다.${NC}"
+    echo -e "${YELLOW}  먼저 누락된 보안그룹을 생성한 후 다시 실행해주세요.${NC}"
+    rm -f /tmp/eks-cluster-trust-policy.json /tmp/eks-node-trust-policy.json
+    exit 1
+fi
 
 echo ""
 echo "=========================================="

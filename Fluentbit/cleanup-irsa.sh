@@ -7,8 +7,8 @@ export AWS_PAGER=""
 # 사용법 체크
 if [ -z "$1" ]; then
   echo "사용법: $0 <cluster-name>"
-  echo "예시: $0 prism-q-an2-eks-cluster-front"
-  echo "예시: $0 prism-q-an2-eks-cluster-back"
+  echo "예시: $0 prism-p-an2-eks-cluster-front"
+  echo "예시: $0 prism-p-an2-eks-cluster-back"
   exit 1
 fi
 
@@ -27,8 +27,8 @@ else
   exit 1
 fi
 
-POLICY_NAME="prism-q-an2-pol-eks-irsa-fluent-bit-${CLUSTER_TYPE}"
-ROLE_NAME="prism-q-an2-role-eks-irsa-fluent-bit-${CLUSTER_TYPE}"
+POLICY_NAME="prism-p-an2-pol-eks-irsa-fluent-bit-${CLUSTER_TYPE}"
+ROLE_NAME="prism-p-an2-role-eks-irsa-fluent-bit-${CLUSTER_TYPE}"
 
 echo "=== Fluent Bit IAM Role 삭제 ==="
 echo "Cluster: $CLUSTER_NAME"

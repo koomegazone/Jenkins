@@ -1,17 +1,40 @@
 #!/bin/bash
 set -e
 
+# AWS CLI 페이저 비활성화
+export AWS_PAGER=""
+
+# 사용법 체크
+if [ -z "$1" ]; then
+  echo "사용법: $0 <cluster-name>"
+  echo "예시: $0 prism-p-an2-eks-cluster-front"
+  echo "예시: $0 prism-p-an2-eks-cluster-back"
+  exit 1
+fi
+
 # 변수 설정
-CLUSTER_NAME="cmas-q-an2-eks-cluster"
+CLUSTER_NAME="$1"
 REGION="ap-northeast-2"
 ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
 NAMESPACE="kube-system"
 SERVICE_ACCOUNT="fluent-bit"
-POLICY_NAME="cmas-q-an2-pol-eks-irsa-fluent-bit"
-ROLE_NAME="cmas-q-an2-role-eks-irsa-fluent-bit"
+
+# 클러스터 이름에서 front/back 추출
+if [[ $CLUSTER_NAME == *"front"* ]]; then
+  CLUSTER_TYPE="front"
+elif [[ $CLUSTER_NAME == *"back"* ]]; then
+  CLUSTER_TYPE="back"
+else
+  echo "Error: 클러스터 이름에 'front' 또는 'back'이 포함되어야 합니다."
+  exit 1
+fi
+
+POLICY_NAME="prism-p-an2-pol-eks-irsa-fluent-bit-${CLUSTER_TYPE}"
+ROLE_NAME="prism-p-an2-role-eks-irsa-fluent-bit-${CLUSTER_TYPE}"
 
 echo "=== Fluent Bit IAM Role 생성 ==="
 echo "Cluster: $CLUSTER_NAME"
+echo "Cluster Type: $CLUSTER_TYPE"
 echo "Region: $REGION"
 echo "Account ID: $ACCOUNT_ID"
 echo "Policy Name: $POLICY_NAME"
@@ -119,6 +142,7 @@ rm -f fluent-bit-opensearch-policy.json trust-policy.json
 echo "=== 완료 ==="
 echo ""
 echo "Cluster: $CLUSTER_NAME"
+echo "Cluster Type: $CLUSTER_TYPE"
 echo "Role ARN: $ROLE_ARN"
 echo ""
 echo "Helm values.yaml에 다음 설정 추가:"

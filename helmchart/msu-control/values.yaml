@@ -16,7 +16,7 @@ fullnameOverride: ""
 
 serviceAccount:
   # Specifies whether a service account should be created
-  create: true
+  create: tru
   # Automatically mount a ServiceAccount's API credentials?
   automount: true
   # Annotations to add to the service account
@@ -33,7 +33,7 @@ podSecurityContext: {}
 
 securityContext: {}
   # capabilities:
-  #   drop:
+  #   drop:https://d-9b67040fbd.awsapps.com/start/#/?tab=accounts
   #   - ALL
   # readOnlyRootFilesystem: true
   # runAsNonRoot: true
